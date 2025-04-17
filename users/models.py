@@ -82,3 +82,31 @@ class Specialization(BaseModel):
 
     def __str__(self):
         return self.name
+
+class DietitianProfile(BaseModel):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='dietitian_profile'
+    )
+    specializations = models.ManyToManyField(
+        Specialization,
+        related_name='dietitians'
+    )
+    bio = models.TextField(blank=True)
+    education = models.TextField(blank=True)
+    experience_years = models.PositiveIntegerField(default=0)
+    certificate_info = models.TextField(blank=True)
+    consultation_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    availability = models.JSONField(default=dict)
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+    total_ratings = models.PositiveIntegerField(default=0)
+    website = models.URLField(blank=True)
+    social_links = models.JSONField(default=dict, blank=True, null=True)
+    
+    class Meta:
+        verbose_name = _('Dietitian Profile')
+        verbose_name_plural = _('Dietitian Profiles')
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} ({self.user.email})"
