@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 from core.models import BaseModel
 from core.enums import UserType, Gender
+from .enums import FitnessLevel
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -107,6 +108,43 @@ class DietitianProfile(BaseModel):
     class Meta:
         verbose_name = _('Dietitian Profile')
         verbose_name_plural = _('Dietitian Profiles')
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} ({self.user.email})"
+    
+class ClientProfile(BaseModel):
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='client_profile'
+    )
+    dietitian = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name='clients',
+        null=True,
+        blank=True,
+        limit_choices_to={'user_type': UserType.DIETITIAN}
+    )
+    height = models.PositiveIntegerField(null=True, blank=True)  # cm
+    weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # kg
+    target_weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    health_conditions = models.TextField(blank=True)
+    allergies = models.TextField(blank=True)
+    medications = models.TextField(blank=True)
+    lifestyle = models.TextField(blank=True)
+    
+    fitness_level = models.IntegerField(
+        choices=FitnessLevel.choices,
+        null=True,
+        blank=True
+    )
+    
+    dietary_preferences = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = _('Client Profile')
+        verbose_name_plural = _('Client Profiles')
 
     def __str__(self):
         return f"{self.user.get_full_name()} ({self.user.email})"
