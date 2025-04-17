@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 from core.models import BaseModel
 from core.enums import UserType, Gender
-from .enums import FitnessLevel
+from .enums import FitnessLevel, HealthMetricType
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -126,8 +126,8 @@ class ClientProfile(BaseModel):
         blank=True,
         limit_choices_to={'user_type': UserType.DIETITIAN}
     )
-    height = models.PositiveIntegerField(null=True, blank=True)  # cm
-    weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # kg
+    height = models.PositiveIntegerField(null=True, blank=True)  
+    weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  
     target_weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     health_conditions = models.TextField(blank=True)
     allergies = models.TextField(blank=True)
@@ -148,3 +148,23 @@ class ClientProfile(BaseModel):
 
     def __str__(self):
         return f"{self.user.get_full_name()} ({self.user.email})"
+    
+
+class HealthMetric(BaseModel):
+    client = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='health_metrics',
+        limit_choices_to={'user_type': UserType.CLIENT}
+    )
+    metric_type = models.PositiveSmallIntegerField(choices=HealthMetricType.choices)
+    value = models.DecimalField(max_digits=10, decimal_places=2)
+    unit = models.CharField(max_length=20)
+    date_recorded = models.DateField()
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-date_recorded']
+
+    def __str__(self):
+        return f"{self.client.email} - {HealthMetricType(self.metric_type).label} - {self.date_recorded}"
