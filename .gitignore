@@ -1,0 +1,101 @@
+# === PYTHON ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.pyc
+
+# === DJANGO ===
+db.sqlite3
+*.sqlite3
+*.bak
+*.log
+*.pot
+*.pyc
+*.env
+.env.*
+.envrc
+.env.bak
+
+# Django migrations
+*/migrations/
+!*/migrations/__init__.py
+
+# === VIRTUAL ENVIRONMENTS ===
+env/
+venv/
+.venv/
+
+# === IDEs & EDITORS ===
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# === OPERATING SYSTEM ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === TESTING ===
+.pytest_cache/
+coverage/
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+
+# === DOCKER / CELERY / BACKGROUND ===
+*.pid
+*.pid.lock
+celerybeat-schedule
+celerybeat.pid
+
+# === MEDIA / STATIC ===
+media/
+staticfiles/
+static_root/
+public/static/
+public/media/
+
+# === NPM / NODE (if React Native or frontend inside) ===
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+*.tgz
+package-lock.json
+.pnpm-debug.log
+
+# === BUILD / DIST ===
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# === GUNICORN / UWSGI ===
+gunicorn.log
+*.sock
+
+# === DATABASE DUMPS ===
+*.dump
+*.sql
+
+# === BACKUPS / EXPORTS ===
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# === CI/CD ===
+.github/
+.gitlab-ci.yml
+Dockerfile*
+docker-compose.yml
+*.lock
+
+# === API DOCS ===
+swagger/
+docs/_build/
