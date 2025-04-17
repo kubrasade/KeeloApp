@@ -1,10 +1,7 @@
 from django.db.models import QuerySet, Model
 from django.http import HttpRequest
-from django.contrib.auth import get_user_model
 from typing import Optional, Type, Any, Dict, List, Callable
-
-User = get_user_model()
-
+from users.models import User
 
 class QueryFilterService:
     @staticmethod

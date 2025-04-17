@@ -69,3 +69,16 @@ class User(AbstractUser, BaseModel):
 
     def is_admin(self):
         return self.user_type == UserType.ADMIN
+    
+class Specialization(BaseModel):
+    code = models.SlugField(max_length=50, unique=True, help_text=_("Unique identifier for the specialization"))
+    name = models.CharField(max_length=100, help_text=_("Display name of the specialization"))
+    description = models.TextField(blank=True, help_text=_("Optional description for further details"))
+
+    class Meta:
+        verbose_name = _("Specialization")
+        verbose_name_plural = _("Specializations")
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
