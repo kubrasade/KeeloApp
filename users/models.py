@@ -25,3 +25,47 @@ class UserManager(BaseUserManager):
         if not extra_fields.get('is_superuser'):
             raise ValueError(_('Superuser must have is_superuser=True.'))
         return self.create_user(email, password, **extra_fields)
+
+
+class User(AbstractUser, BaseModel):
+    username = None
+    email = models.EmailField(_('email address'), unique=True, blank=False)
+    user_type = models.CharField(max_length=15, choices=UserType.choices, default=UserType.CLIENT)
+    phone_number = models.CharField(max_length=15, blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
+    gender = models.CharField(max_length=10, choices=Gender.choices, blank=True, null=True)
+    birth_date = models.DateField(null=True, blank=True)
+    address = models.TextField(blank=True)
+    city = models.CharField(max_length=50, blank=True)
+    country = models.CharField(max_length=50, blank=True)
+    postal_code = models.CharField(max_length=10, blank=True)
+    is_verified = models.BooleanField(default=False)
+    notification_preferences = models.JSONField(default=dict)
+    language_preference = models.CharField(max_length=10, default='tr')
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = UserManager()
+
+    class Meta:
+        verbose_name = _('User')
+        verbose_name_plural = _('Users')
+
+    def __str__(self):
+        return self.email
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}".strip()
+
+    def get_short_name(self):
+        return self.first_name or self.email
+
+    def is_dietitian(self):
+        return self.user_type == UserType.DIETITIAN
+
+    def is_client(self):
+        return self.user_type == UserType.CLIENT
+
+    def is_admin(self):
+        return self.user_type == UserType.ADMIN

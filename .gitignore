@@ -5,6 +5,8 @@ __pycache__/
 *.pyo
 *.pyd
 *.pyc
+**/__pycache__/
+**/*.pyc
 
 # === DJANGO ===
 db.sqlite3
