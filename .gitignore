@@ -101,3 +101,5 @@ docker-compose.yml
 # === API DOCS ===
 swagger/
 docs/_build/
+
+.env

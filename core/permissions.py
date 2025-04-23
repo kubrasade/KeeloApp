@@ -98,3 +98,27 @@ class HasAPIKey(permissions.BasePermission):
         if not api_key:
             return False
         return True 
+
+class IsAdminOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return request.user and request.user.is_staff
+
+class IsOwnerOrAdmin(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        if hasattr(obj, 'user'):
+            return obj.user == request.user or request.user.is_staff
+        elif hasattr(obj, 'client'):
+            return obj.client == request.user or request.user.is_staff
+        return request.user.is_staff
+    
+class IsProfileOwnerOrAdmin(permissions.BasePermission):
+   def has_object_permission(self, request, view, obj):
+        return (
+            request.user.is_staff or
+            (hasattr(obj, 'user') and obj.user == request.user)
+        )

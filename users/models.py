@@ -27,7 +27,12 @@ class UserManager(BaseUserManager):
             raise ValueError(_('Superuser must have is_superuser=True.'))
         return self.create_user(email, password, **extra_fields)
 
-
+def default_notification_preferences():
+    return {
+        "email": True,
+        "sms": False,
+        "push": True
+    }
 class User(AbstractUser, BaseModel):
     username = None
     email = models.EmailField(_('email address'), unique=True, blank=False)
@@ -41,7 +46,7 @@ class User(AbstractUser, BaseModel):
     country = models.CharField(max_length=50, blank=True)
     postal_code = models.CharField(max_length=10, blank=True)
     is_verified = models.BooleanField(default=False)
-    notification_preferences = models.JSONField(default=dict)
+    notification_preferences = models.JSONField(default=default_notification_preferences, blank=True)
     language_preference = models.CharField(max_length=10, default='tr')
 
     USERNAME_FIELD = 'email'
