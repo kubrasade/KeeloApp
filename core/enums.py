@@ -20,3 +20,9 @@ class VerificationStatus(models.IntegerChoices):
     PENDING = 1, 'Pending'
     VERIFIED = 2, 'Verified'
     REJECTED = 3, 'Rejected'
+
+class MatchingStatus(models.IntegerChoices):
+    PENDING = 1, 'Pending'
+    ACCEPTED = 2, 'Accepted'
+    REJECTED = 3, 'Rejected'
+    ENDED = 4, 'Ended'
