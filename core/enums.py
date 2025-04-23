@@ -26,3 +26,8 @@ class MatchingStatus(models.IntegerChoices):
     ACCEPTED = 2, 'Accepted'
     REJECTED = 3, 'Rejected'
     ENDED = 4, 'Ended'
+
+class ReviewStatus(models.IntegerChoices):
+    PENDING = 1, 'Pending'
+    ACCEPTED = 2, 'Accepted'
+    REJECTED = 3, 'Rejected'
