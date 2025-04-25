@@ -36,7 +36,7 @@ def default_notification_preferences():
 class User(AbstractUser, BaseModel):
     username = None
     email = models.EmailField(_('email address'), unique=True, blank=False)
-    user_type = models.CharField(max_length=15, choices=UserType.choices, default=UserType.CLIENT)
+    user_type = models.PositiveSmallIntegerField(choices=UserType.choices, default=UserType.CLIENT)
     phone_number = models.CharField(max_length=15, blank=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
     gender = models.CharField(max_length=10, choices=Gender.choices, blank=True, null=True)
