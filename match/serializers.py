@@ -64,3 +64,22 @@ class DietitianScoreSerializer(serializers.ModelSerializer):
             normalized_experience * 0.3 +
             normalized_reviews * 0.3
         ) * 100
+
+class SpecializationChoiceSerializer(serializers.ModelSerializer):
+    specialization = SpecializationSerializer(read_only=True)
+    specialization_id = serializers.PrimaryKeyRelatedField(
+        queryset=Specialization.objects.all(),
+        source='specialization',
+        write_only=True
+    )
+
+    class Meta:
+        model = SpecializationChoice
+        fields = ['id', 'specialization', 'specialization_id', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+    def validate(self, data):
+        client = self.context['request'].user.client_profile
+        if SpecializationChoice.objects.filter(client=client, specialization=data['specialization']).exists():
+            raise serializers.ValidationError("You have already selected this specialization.")
+        return data
