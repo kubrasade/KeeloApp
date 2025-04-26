@@ -65,3 +65,56 @@ class DietitianScoringService:
         
         return sorted(scored_dietitians, key=lambda x: x['score']['total_score'], reverse=True)
 
+class MatchingService:
+    @staticmethod
+    def create_matching(client, dietitian, specialization):
+        if not SpecializationChoice.objects.filter(
+            client=client,
+            specialization=specialization
+        ).exists():
+            raise exceptions.ValidationError("You have not chosen this specialization.")
+
+        if not dietitian.specializations.filter(id=specialization.id).exists():
+            raise exceptions.ValidationError("This dietitian is not in your chosen specialty.")
+        
+        if MatchModel.objects.filter(
+            client=client,
+            dietitian=dietitian,
+            specialization=specialization
+        ).exists():
+            raise exceptions.ValidationError("This match already exists.")
+        
+        return MatchModel.objects.create(
+            client=client,
+            dietitian=dietitian,
+            specialization=specialization,
+            status=MatchingStatus.PENDING
+        )
+
+    @staticmethod
+    def update_matching_status(matching, status, user):
+        if status not in [MatchingStatus.ACCEPTED, MatchingStatus.REJECTED, MatchingStatus.ENDED]:
+            raise exceptions.ValidationError("Invalid status.")
+        
+        if status == MatchingStatus.ACCEPTED and matching.status == MatchingStatus.PENDING:
+            if user != matching.dietitian.user and not user.is_staff:
+                raise exceptions.PermissionDenied("You are not authorized to perform this operation.")
+            matching.matched_at = timezone.now()
+        
+        elif status == MatchingStatus.ENDED:
+            if user != matching.client.user and user != matching.dietitian.user and not user.is_staff:
+                raise exceptions.PermissionDenied("You are not authorized to perform this operation.")
+            matching.ended_at = timezone.now()
+        
+        matching.status = status
+        matching.save()
+        return matching
+
+    @staticmethod
+    def get_client_matchings(client):
+        return MatchModel.objects.filter(client=client)
+
+    @staticmethod
+    def get_dietitian_matchings(dietitian):
+        return  MatchModel.objects.filter(dietitian=dietitian)
+
