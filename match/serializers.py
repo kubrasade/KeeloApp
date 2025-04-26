@@ -104,3 +104,19 @@ class MatchingSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return MatchingService.create_matching(**validated_data)
+    
+class MatchingUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MatchModel
+        fields = ['status']
+
+    def validate_status(self, value):
+        if value not in [MatchingStatus.ACCEPTED, MatchingStatus.REJECTED, MatchingStatus.ENDED]:
+            raise serializers.ValidationError("Invalid status.")
+        return value
+
+    def update(self, instance, validated_data):
+        return MatchingService.update_matching_status(instance, validated_data['status'])
+
+
+    
