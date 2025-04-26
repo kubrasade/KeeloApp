@@ -89,3 +89,24 @@ class MatchingListCreateView(generics.ListCreateAPIView):
         matching = MatchingService.create_matching(client, dietitian, specialization)
         serializer.instance = matching
 
+class MatchingRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = MatchModel.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return MatchingSerializer
+        return MatchingUpdateSerializer
+
+    def perform_update(self, serializer):
+        matching = self.get_object()
+        new_status = serializer.validated_data['status']
+        
+        updated_matching = MatchingService.update_matching_status(
+            matching=matching,
+            status=new_status,
+            user=self.request.user
+        )
+        serializer.instance = updated_matching
+
+
