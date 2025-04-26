@@ -14,3 +14,9 @@ class SimpleUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'email', 'first_name', 'last_name')
 
+class SimpleClientProfileSerializer(serializers.ModelSerializer):
+    user = SimpleUserSerializer(read_only=True)
+
+    class Meta:
+        model = ClientProfile
+        fields = ('id', 'user')
