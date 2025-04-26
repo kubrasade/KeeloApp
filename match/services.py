@@ -118,3 +118,28 @@ class MatchingService:
     def get_dietitian_matchings(dietitian):
         return  MatchModel.objects.filter(dietitian=dietitian)
 
+class ReviewService:
+    @staticmethod
+    def create_review(matching, rating, comment, user):
+        if matching.client.user != user:
+            raise exceptions.PermissionDenied("You can only comment to your own dietitian.")
+        
+        if matching.status != MatchingStatus.ACCEPTED:
+            raise exceptions.ValidationError("You can only comment on active matches.")
+        
+        if Review.objects.filter(matching=matching).exists():
+            raise exceptions.ValidationError("You have already commented on this dietitian.")
+        
+        return Review.objects.create(
+            matching=matching,
+            rating=rating,
+            comment=comment
+        )
+
+    @staticmethod
+    def get_dietitian_reviews(dietitian):
+        return Review.objects.filter(matching__dietitian=dietitian)
+
+    @staticmethod
+    def get_client_reviews(client):
+        return Review.objects.filter(matching__client=client) 
