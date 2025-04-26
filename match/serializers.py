@@ -27,3 +27,8 @@ class SimpleDietitianProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = DietitianProfile
         fields = ('id', 'user', 'specializations', 'experience_years')
+
+class SimpleMatchingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MatchModel
+        fields = ['id']
