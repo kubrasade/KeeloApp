@@ -118,5 +118,37 @@ class MatchingUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         return MatchingService.update_matching_status(instance, validated_data['status'])
 
+class ReviewSerializer(serializers.ModelSerializer):
+    matching = SimpleMatchingSerializer(read_only=True)
+    matching_id = serializers.PrimaryKeyRelatedField(
+        queryset=MatchModel.objects.filter(status=MatchingStatus.ACCEPTED),
+        source='matching',
+        write_only=True
+    )
+
+    class Meta:
+        model = Review
+        fields = ['id', 'matching', 'matching_id', 'rating', 'comment', 'created_at', 'updated_at', 'status']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'status']
+
+    def validate(self, data):
+        matching = data['matching']
+        user = self.context['request'].user
+
+        if matching.client.user != user:
+            raise serializers.ValidationError("You can only review your own dietitian.")
+
+        if Review.objects.filter(matching=matching).exists():
+            raise serializers.ValidationError("You have already submitted a review for this match.")
+        return data
+
+    def create(self, validated_data):
+        return ReviewService.create_review(
+            matching=validated_data['matching'],
+            rating=validated_data['rating'],
+            comment=validated_data.get('comment', ''),
+            user=self.context['request'].user
+        )
+
 
     
