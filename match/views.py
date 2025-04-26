@@ -153,3 +153,9 @@ class ReviewRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         if instance.matching.client.user != self.request.user:
             raise exceptions.PermissionDenied("You can only delete your own comments.")
         super().perform_destroy(instance)
+
+
+class ReviewStatusView(generics.UpdateAPIView):
+    queryset = Review.objects.all()
+    serializer_class= ReviewStatusUpdateSerializer
+    permission_classes=[IsAdmin]
