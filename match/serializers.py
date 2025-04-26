@@ -20,3 +20,10 @@ class SimpleClientProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClientProfile
         fields = ('id', 'user')
+
+class SimpleDietitianProfileSerializer(serializers.ModelSerializer):
+    user = SimpleUserSerializer(read_only=True)
+
+    class Meta:
+        model = DietitianProfile
+        fields = ('id', 'user', 'specializations', 'experience_years')
