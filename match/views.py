@@ -110,3 +110,31 @@ class MatchingRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         serializer.instance = updated_matching
 
 
+class ReviewListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        user_type = self.request.user.user_type
+        if user_type == UserType.CLIENT:
+            return ReviewService.get_client_reviews(self.request.user.client_profile).filter(status=ReviewStatus.ACCEPTED)
+        elif user_type == UserType.DIETITIAN:
+            return ReviewService.get_dietitian_reviews(self.request.user.dietitian_profile).filter(status=ReviewStatus.ACCEPTED)
+        elif user_type == UserType.ADMIN:
+            return Review.objects.all()
+        return Review.objects.none()
+
+    def perform_create(self, serializer):
+        matching = serializer.validated_data['matching']
+        rating = serializer.validated_data['rating']
+        comment = serializer.validated_data['comment']
+        
+        review = ReviewService.create_review(
+            matching=matching,
+            rating=rating,
+            comment=comment,
+            user=self.request.user
+        )
+        serializer.instance = review
+
+
