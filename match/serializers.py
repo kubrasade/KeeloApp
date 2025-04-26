@@ -150,5 +150,12 @@ class ReviewSerializer(serializers.ModelSerializer):
             user=self.context['request'].user
         )
 
+class ReviewStatusUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['status']
 
-    
+    def validate_status(self, value):
+        if value not in [ReviewStatus.ACCEPTED, ReviewStatus.REJECTED]:
+            raise serializers.ValidationError("Only accept or reject operations are allowed.")
+        return value
