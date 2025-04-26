@@ -83,3 +83,24 @@ class SpecializationChoiceSerializer(serializers.ModelSerializer):
         if SpecializationChoice.objects.filter(client=client, specialization=data['specialization']).exists():
             raise serializers.ValidationError("You have already selected this specialization.")
         return data
+
+class MatchingSerializer(serializers.ModelSerializer):
+    client = SimpleClientProfileSerializer(read_only=True)
+    dietitian = DietitianScoreSerializer(read_only=True)
+    specialization = SpecializationSerializer(read_only=True)
+
+    client_id = serializers.PrimaryKeyRelatedField(queryset=ClientProfile.objects.all(), source='client', write_only=True)
+    dietitian_id = serializers.PrimaryKeyRelatedField(queryset=DietitianProfile.objects.all(), source='dietitian', write_only=True)
+    specialization_id = serializers.PrimaryKeyRelatedField(queryset=Specialization.objects.all(), source='specialization', write_only=True)
+
+    class Meta:
+        model = MatchModel
+        fields = [
+            'id', 'client', 'dietitian', 'specialization',
+            'client_id', 'dietitian_id', 'specialization_id',
+            'status', 'created_at', 'updated_at', 'matched_at', 'ended_at'
+        ]
+        read_only_fields = ['id', 'status', 'created_at', 'updated_at', 'matched_at', 'ended_at']
+
+    def create(self, validated_data):
+        return MatchingService.create_matching(**validated_data)
