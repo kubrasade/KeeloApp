@@ -138,3 +138,18 @@ class ReviewListCreateView(generics.ListCreateAPIView):
         serializer.instance = review
 
 
+class ReviewRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+    def perform_update(self, serializer):
+        review = self.get_object()
+        if review.matching.client.user != self.request.user:
+            raise exceptions.PermissionDenied("You can only edit your own comments.")
+        super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        if instance.matching.client.user != self.request.user:
+            raise exceptions.PermissionDenied("You can only delete your own comments.")
+        super().perform_destroy(instance)
