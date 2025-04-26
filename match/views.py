@@ -48,3 +48,44 @@ class DietitianListBySpecializationView(generics.ListAPIView):
             return []
 
 
+class MatchingListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MatchingSerializer
+
+    def get_queryset(self):
+        user_type = self.request.user.user_type
+
+        if user_type == UserType.CLIENT:
+            return MatchingService.get_client_matchings(self.request.user.client_profile)
+
+        elif user_type == UserType.DIETITIAN:
+            return MatchingService.get_dietitian_matchings(self.request.user.dietitian_profile)
+
+        elif user_type == UserType.ADMIN:
+            return MatchModel.objects.all()
+
+        return MatchModel.objects.none()
+
+    def perform_create(self, serializer):
+        user = self.request.user
+
+        if user.user_type not in [UserType.CLIENT, UserType.ADMIN]:
+            raise exceptions.PermissionDenied("Only clients or admins can send matching requests.")
+
+        if user.user_type == UserType.ADMIN:
+            client_id = self.request.data.get('client_id')
+            if not client_id:
+                raise exceptions.ValidationError("Admin must provide client_id.")
+            try:
+                client = ClientProfile.objects.get(id=client_id)
+            except ClientProfile.DoesNotExist:
+                raise exceptions.ValidationError("Client not found.")
+        else:
+            client = user.client_profile
+
+        dietitian = serializer.validated_data['dietitian']
+        specialization = serializer.validated_data['specialization']
+
+        matching = MatchingService.create_matching(client, dietitian, specialization)
+        serializer.instance = matching
+
