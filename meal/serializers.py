@@ -162,4 +162,11 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
         fields = ['id', 'recipe', 'recipe_id', 'added_at']
         read_only_fields = ['added_at']
 
-
+class MacroGoalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MacroGoal
+        fields = [
+            'id', 'daily_calories', 'daily_protein',
+            'daily_carbs', 'daily_fat', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'user']
