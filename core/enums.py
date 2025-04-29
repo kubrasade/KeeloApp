@@ -31,3 +31,8 @@ class ReviewStatus(models.IntegerChoices):
     PENDING = 1, 'Pending'
     ACCEPTED = 2, 'Accepted'
     REJECTED = 3, 'Rejected'
+
+class Difficulty_Type(models.IntegerChoices):
+    EASY= 1, "Easy"
+    MEDIUM= 2, "Medium"
+    HARD= 3, "Hard"
