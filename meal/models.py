@@ -112,15 +112,13 @@ class RecipeIngredient(models.Model):
     def __str__(self):
         return f"{self.quantity} {self.unit} {self.ingredient.name}"
 
-class MealPlan(models.Model):
+class MealPlan(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='meal_plans')
     day = models.PositiveSmallIntegerField(choices=Day_Choices.choices)
-    meal_type = models.CharField(max_length=10, choices=Recipe.MEAL_TYPE_CHOICES)
+    meal_type = models.PositiveSmallIntegerField(choices=Meal_Type.choices)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     date = models.DateField()
     notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ['user', 'day', 'meal_type', 'date']
@@ -128,3 +126,19 @@ class MealPlan(models.Model):
 
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.get_day_display()} - {self.get_meal_type_display()}"
+
+
+class RecipeRating(BaseModel):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='ratings')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    comment = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ['recipe', 'user']
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.recipe.title} - {self.rating}"
