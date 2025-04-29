@@ -153,4 +153,15 @@ class FavoriteRecipeService:
     def get_user_favorites(user):
         return FavoriteRecipe.objects.filter(user=user).select_related('recipe')
 
+class MacroGoalService:
+    @staticmethod
+    def get_user_macro_goal(user):
+        return getattr(user, 'macro_goal', None)
 
+    @staticmethod
+    def update_macro_goal(user, data):
+        macro_goal, created = MacroGoal.objects.get_or_create(user=user)
+        for attr, value in data.items():
+            setattr(macro_goal, attr, value)
+        macro_goal.save()
+        return macro_goal
