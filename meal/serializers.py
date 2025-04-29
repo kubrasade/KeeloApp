@@ -148,9 +148,14 @@ class RecipeRatingSerializer(serializers.ModelSerializer):
         ).exists():
             raise serializers.ValidationError("You have already reviewed this recipe.")
         return data
-
+    
+class RecipeListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ['id', 'title', 'image']
+        
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
-    recipe = RecipeSerializer(read_only=True)
+    recipe = RecipeListSerializer(read_only=True)
     recipe_id = serializers.PrimaryKeyRelatedField(
         queryset=Recipe.objects.all(),
         source='recipe',
@@ -170,3 +175,4 @@ class MacroGoalSerializer(serializers.ModelSerializer):
             'daily_carbs', 'daily_fat', 'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at', 'user']
+
