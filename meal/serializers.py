@@ -132,10 +132,22 @@ class MealPlanSerializer(serializers.ModelSerializer):
             meal_type=data['meal_type'],
             date=data['date']
         ).exists():
-            raise serializers.ValidationError("Bu öğün için zaten bir plan var.")
+            raise serializers.ValidationError("There is already a plan for this meal.")
         return data
 
+class RecipeRatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecipeRating
+        fields = ['id', 'rating', 'comment', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'user', 'recipe']
 
+    def validate(self, data):
+        if RecipeRating.objects.filter(
+            user=self.context['request'].user,
+            recipe=self.context['recipe']
+        ).exists():
+            raise serializers.ValidationError("You have already reviewed this recipe.")
+        return data
 
 
 
