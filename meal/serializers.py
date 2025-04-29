@@ -149,6 +149,17 @@ class RecipeRatingSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("You have already reviewed this recipe.")
         return data
 
+class FavoriteRecipeSerializer(serializers.ModelSerializer):
+    recipe = RecipeSerializer(read_only=True)
+    recipe_id = serializers.PrimaryKeyRelatedField(
+        queryset=Recipe.objects.all(),
+        source='recipe',
+        write_only=True
+    )
 
+    class Meta:
+        model = FavoriteRecipe
+        fields = ['id', 'recipe', 'recipe_id', 'added_at']
+        read_only_fields = ['added_at']
 
 
