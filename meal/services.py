@@ -14,6 +14,7 @@ from django.conf import settings
 from rest_framework import exceptions
 from django.utils import timezone
 from datetime import timedelta
+from core.enums import UserType
 
 class RecipeService:
     @staticmethod
@@ -73,6 +74,15 @@ class RecipeService:
 
         cache.set(cache_key, recipes, settings.CACHE_TTL)
         return recipes
+    
+
+    @staticmethod
+    def approve_recipe(user, recipe):
+        if not (user.is_staff or user.user_type in [UserType.DIETITIAN, UserType.ADMIN]):
+            raise exceptions.PermissionDenied("Only dietitians or admins can approve recipes.")
+        recipe.approved_by = user
+        recipe.save()
+        return recipe
 
 class MealPlanService:
     @staticmethod
