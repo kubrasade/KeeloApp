@@ -4,6 +4,9 @@ from core.enums import MatchingStatus
 from django.utils import timezone
 from rest_framework import exceptions
 from django.db.models import Avg, Count
+from django.conf import settings
+from django.core.cache import cache
+from notifications.services import NotificationService  
 
 class SpecializationChoiceService:
     @staticmethod
@@ -23,24 +26,25 @@ class SpecializationChoiceService:
 
 class DietitianScoringService:
     @staticmethod
+
     def calculate_dietitian_score(dietitian):
-        rating_weight = 0.4
-        experience_weight = 0.3
-        review_count_weight = 0.3
+        cache_key = f'dietitian_score_{dietitian.id}'
+        cached_score = cache.get(cache_key)
+        if cached_score:
+            return cached_score
+
+        rating_weight = settings.RATING_WEIGHT
+        experience_weight = settings.EXPERIENCE_WEIGHT
+        review_count_weight = settings.REVIEW_COUNT_WEIGHT
 
         avg_rating = Review.objects.filter(matching__dietitian=dietitian).aggregate(Avg('rating'))['rating__avg'] or 0
-
-        experience_years = dietitian.experience_years or 0 
-
+        experience_years = dietitian.experience_years or 0
         review_count = Review.objects.filter(matching__dietitian=dietitian).count()
 
-        max_experience = 30  
-        max_reviews = 100    
+        normalized_experience = min(experience_years / 30, 1)  
+        normalized_reviews = min(review_count / 100, 1)        
 
-        normalized_experience = min(experience_years / max_experience, 1)
-        normalized_reviews = min(review_count / max_reviews, 1)
-
-        return {
+        score = {
             'average_rating': avg_rating,
             'experience_years': experience_years,
             'review_count': review_count,
@@ -50,6 +54,9 @@ class DietitianScoringService:
                 normalized_reviews * review_count_weight
             ) * 100
         }
+
+        cache.set(cache_key, score, timeout=settings.CACHE_TTL)
+        return score
 
     @staticmethod
     def get_dietitians_by_specialization(specialization):
@@ -96,6 +103,8 @@ class MatchingService:
         if status not in [MatchingStatus.ACCEPTED, MatchingStatus.REJECTED, MatchingStatus.ENDED]:
             raise exceptions.ValidationError("Invalid status.")
         
+        old_status = matching.status
+
         if status == MatchingStatus.ACCEPTED and matching.status == MatchingStatus.PENDING:
             if user != matching.dietitian.user and not user.is_staff:
                 raise exceptions.PermissionDenied("You are not authorized to perform this operation.")
@@ -108,6 +117,9 @@ class MatchingService:
         
         matching.status = status
         matching.save()
+
+        NotificationService.send_matching_status_notification(matching, old_status, status)
+        
         return matching
 
     @staticmethod
@@ -135,6 +147,7 @@ class ReviewService:
             rating=rating,
             comment=comment
         )
+        
 
     @staticmethod
     def get_dietitian_reviews(dietitian):

@@ -6,6 +6,7 @@ from django.db.models import Avg
 from core.enums import MatchingStatus, ReviewStatus
 from .services import MatchingService, ReviewService
 from django.contrib.auth import get_user_model
+from notifications.services import NotificationService
 
 User= get_user_model()
 
@@ -149,7 +150,6 @@ class ReviewSerializer(serializers.ModelSerializer):
             comment=validated_data.get('comment', ''),
             user=self.context['request'].user
         )
-
 class ReviewStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
@@ -159,3 +159,15 @@ class ReviewStatusUpdateSerializer(serializers.ModelSerializer):
         if value not in [ReviewStatus.ACCEPTED, ReviewStatus.REJECTED]:
             raise serializers.ValidationError("Only accept or reject operations are allowed.")
         return value
+
+    def update(self, instance, validated_data):
+        old_status = instance.status  
+        new_status = validated_data.get('status', instance.status)
+
+        instance.status = new_status
+        instance.save()
+
+        if old_status != ReviewStatus.ACCEPTED and new_status == ReviewStatus.ACCEPTED:
+            NotificationService.send_review_notification(instance)
+
+        return instance
