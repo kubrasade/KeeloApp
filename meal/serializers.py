@@ -28,3 +28,12 @@ class IngredientSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
+
+class DietaryTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DietaryTag
+        fields = ['id', 'name', 'description', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+

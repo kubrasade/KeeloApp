@@ -5,7 +5,7 @@ from core.models import BaseModel
 from core.enums import Difficulty_Type, Day_Choices
 from .enums import Meal_Type, Unit_Type
 
-class DietaryTag(models.Model):
+class DietaryTag(BaseModel):
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True)
 
