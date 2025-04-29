@@ -29,15 +29,18 @@ THIRD_PARTY_APPS = [
     'djoser',
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
-    
+    'django_filters',
 ]
 
 LOCAL_APPS =[
     'core',
     'users',
     'match',
+    'authub',
+    'matchings',
+    'notifications',
 ]
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS 
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -118,6 +121,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+    ),
 }
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8000")
@@ -145,3 +152,16 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://redis:6379/1',
+    }
+}
+
+CACHE_TTL = 60 * 60  
+
+RATING_WEIGHT = 0.4
+EXPERIENCE_WEIGHT = 0.3
+REVIEW_COUNT_WEIGHT = 0.3
