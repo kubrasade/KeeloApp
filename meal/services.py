@@ -134,3 +134,23 @@ class RecipeRatingService:
             'rating_distribution': distribution_dict
         }
 
+class FavoriteRecipeService:
+    @staticmethod
+    def add_to_favorites(user, recipe):
+        if FavoriteRecipe.objects.filter(user=user, recipe=recipe).exists():
+            raise exceptions.ValidationError("This recipe has already been added to your favorites.")
+        return FavoriteRecipe.objects.create(user=user, recipe=recipe)
+
+    @staticmethod
+    def remove_from_favorites(user, recipe):
+        favorite = FavoriteRecipe.objects.filter(user=user, recipe=recipe).first()
+        if not favorite:
+            raise exceptions.ValidationError("This recipe was not found in your favorites.")
+        favorite.delete()
+        return
+
+    @staticmethod
+    def get_user_favorites(user):
+        return FavoriteRecipe.objects.filter(user=user).select_related('recipe')
+
+
