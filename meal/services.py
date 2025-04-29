@@ -102,3 +102,35 @@ class MealPlanService:
         return total_calories
 
 
+class RecipeRatingService:
+    @staticmethod
+    def create_rating(user, recipe, data):
+        if RecipeRating.objects.filter(user=user, recipe=recipe).exists():
+            raise exceptions.ValidationError("You have already reviewed this recipe.")
+        
+        return RecipeRating.objects.create(user=user, recipe=recipe, **data)
+
+    @staticmethod
+    def get_recipe_statistics(recipe):
+        ratings = RecipeRating.objects.filter(recipe=recipe)
+        total_ratings = ratings.count()
+        
+        if total_ratings == 0:
+            return {
+                'average_rating': 0,
+                'rating_count': 0,
+                'rating_distribution': {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+            }
+        
+        rating_distribution = ratings.values('rating').annotate(count=Count('rating'))
+        distribution_dict = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+        
+        for item in rating_distribution:
+            distribution_dict[item['rating']] = item['count']
+        
+        return {
+            'average_rating': ratings.aggregate(avg=Avg('rating'))['avg'],
+            'rating_count': total_ratings,
+            'rating_distribution': distribution_dict
+        }
+
