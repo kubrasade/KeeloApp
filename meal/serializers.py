@@ -108,3 +108,35 @@ class RecipeSerializer(serializers.ModelSerializer):
                 RecipeIngredient.objects.create(recipe=instance, **ingredient_data)
 
         return instance
+    
+class MealPlanSerializer(serializers.ModelSerializer):
+    recipe = RecipeSerializer(read_only=True)
+    recipe_id = serializers.PrimaryKeyRelatedField(
+        queryset=Recipe.objects.all(),
+        source='recipe',
+        write_only=True
+    )
+
+    class Meta:
+        model = MealPlan
+        fields = [
+            'id', 'day', 'meal_type', 'recipe', 'recipe_id',
+            'date', 'notes', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'user']
+
+    def validate(self, data):
+        if MealPlan.objects.filter(
+            user=self.context['request'].user,
+            day=data['day'],
+            meal_type=data['meal_type'],
+            date=data['date']
+        ).exists():
+            raise serializers.ValidationError("Bu öğün için zaten bir plan var.")
+        return data
+
+
+
+
+
+
