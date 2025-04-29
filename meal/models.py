@@ -142,3 +142,11 @@ class RecipeRating(BaseModel):
 
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.recipe.title} - {self.rating}"
+    
+class FavoriteRecipe(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='favorite_recipes')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='favorited_by')
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'recipe']
