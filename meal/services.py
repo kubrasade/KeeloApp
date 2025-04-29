@@ -74,4 +74,31 @@ class RecipeService:
         cache.set(cache_key, recipes, settings.CACHE_TTL)
         return recipes
 
+class MealPlanService:
+    @staticmethod
+    def create_meal_plan(user, data):
+        if MealPlan.objects.filter(
+            user=user,
+            day=data['day'],
+            meal_type=data['meal_type'],
+            date=data['date']
+        ).exists():
+            raise exceptions.ValidationError("There is already a plan for this meal.")
+        
+        return MealPlan.objects.create(user=user, **data)
+
+    @staticmethod
+    def get_weekly_meal_plan(user, start_date):
+        end_date = start_date + timedelta(days=6)
+        return MealPlan.objects.filter(
+            user=user,
+            date__range=[start_date, end_date]
+        ).order_by('date', 'meal_type')
+
+    @staticmethod
+    def get_daily_calories(user, date):
+        meal_plans = MealPlan.objects.filter(user=user, date=date)
+        total_calories = sum(meal_plan.recipe.total_calories for meal_plan in meal_plans)
+        return total_calories
+
 
