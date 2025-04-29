@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from core.models import BaseModel
-from core.enums import Difficulty_Type
+from core.enums import Difficulty_Type, Day_Choices
 from .enums import Meal_Type, Unit_Type
 
 class DietaryTag(models.Model):
@@ -111,3 +111,20 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f"{self.quantity} {self.unit} {self.ingredient.name}"
+
+class MealPlan(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='meal_plans')
+    day = models.PositiveSmallIntegerField(choices=Day_Choices.choices)
+    meal_type = models.CharField(max_length=10, choices=Recipe.MEAL_TYPE_CHOICES)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    date = models.DateField()
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['user', 'day', 'meal_type', 'date']
+        ordering = ['date', 'meal_type']
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.get_day_display()} - {self.get_meal_type_display()}"

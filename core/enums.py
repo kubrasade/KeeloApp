@@ -36,3 +36,12 @@ class Difficulty_Type(models.IntegerChoices):
     EASY= 1, "Easy"
     MEDIUM= 2, "Medium"
     HARD= 3, "Hard"
+
+class Day_Choices(models.IntegerChoices):
+    MONDAY= 1, "Monday"
+    TUESDAY=2 , "Tuesday"
+    WEDNESDAY= 3, "Wednesday"
+    THURSDAY=4, "Thursday"
+    FRIDAY=5, "Friday"
+    SATURDAY=6, "Saturday"
+    SUNDAY=7, "Sunday"
