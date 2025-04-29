@@ -88,10 +88,15 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients', [])
+        dietary_tags_data = validated_data.pop('dietary_tags', [])
+
         recipe = Recipe.objects.create(**validated_data)
 
         for ingredient_data in ingredients_data:
             RecipeIngredient.objects.create(recipe=recipe, **ingredient_data)
+
+        if dietary_tags_data:
+            recipe.dietary_tags.set(dietary_tags_data)
 
         return recipe
 
