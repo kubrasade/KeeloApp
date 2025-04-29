@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from core.models import BaseModel
 from core.enums import Difficulty_Type
-from .enums import Meal_Type
+from .enums import Meal_Type, Unit_Type
 
 class DietaryTag(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -97,3 +97,17 @@ class Recipe(BaseModel):
     @property
     def estimated_total_time(self):
         return self.preparation_time + self.cooking_time
+    
+
+class RecipeIngredient(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='ingredients')
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    quantity = models.FloatField(validators=[MinValueValidator(0)])
+    unit = models.PositiveSmallIntegerField( choices=Unit_Type.choices)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ['recipe', 'ingredient']
+
+    def __str__(self):
+        return f"{self.quantity} {self.unit} {self.ingredient.name}"
