@@ -49,3 +49,62 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         fields = ['id', 'ingredient', 'ingredient_id', 'quantity', 'unit', 'unit_display', 'notes']
         read_only_fields = ['id']
 
+class RecipeSerializer(serializers.ModelSerializer):
+    ingredients = RecipeIngredientSerializer(many=True, required=False)
+    category = MealCategorySerializer(read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=MealCategory.objects.all(),
+        source='category',
+        write_only=True
+    )
+    dietary_tags = DietaryTagSerializer(many=True, read_only=True)
+    dietary_tag_ids = serializers.PrimaryKeyRelatedField(
+        queryset=DietaryTag.objects.all(),
+        source='dietary_tags',
+        write_only=True,
+        many=True
+    )
+    total_calories = serializers.FloatField(read_only=True)
+    total_protein = serializers.FloatField(read_only=True)
+    total_carbs = serializers.FloatField(read_only=True)
+    total_fat = serializers.FloatField(read_only=True)
+    average_rating = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Recipe
+        fields = [
+            'id', 'title', 'description', 'instructions',
+            'preparation_time', 'cooking_time', 'servings',
+            'difficulty', 'meal_type', 'image', 'video_url',
+            'category', 'category_id',
+            'ingredients', 'dietary_tags', 'dietary_tag_ids',
+            'total_calories', 'total_protein', 'total_carbs', 'total_fat',
+            'average_rating', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'created_by']
+
+    def get_average_rating(self, obj):
+        return obj.ratings.aggregate(avg_rating=Avg('rating'))['avg_rating'] or 0
+
+    def create(self, validated_data):
+        ingredients_data = validated_data.pop('ingredients', [])
+        recipe = Recipe.objects.create(**validated_data)
+
+        for ingredient_data in ingredients_data:
+            RecipeIngredient.objects.create(recipe=recipe, **ingredient_data)
+
+        return recipe
+
+    def update(self, instance, validated_data):
+        ingredients_data = validated_data.pop('ingredients', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        if ingredients_data is not None:
+            instance.ingredients.all().delete()
+            for ingredient_data in ingredients_data:
+                RecipeIngredient.objects.create(recipe=instance, **ingredient_data)
+
+        return instance
