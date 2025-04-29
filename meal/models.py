@@ -2,6 +2,8 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from core.models import BaseModel
+from core.enums import Difficulty_Type
+from .enums import Meal_Type
 
 class DietaryTag(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -36,3 +38,62 @@ class Ingredient(BaseModel):
 
     def __str__(self):
         return self.name
+
+
+class Recipe(BaseModel):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    instructions = models.TextField()
+    preparation_time = models.PositiveIntegerField(help_text="Preparation time (minutes)")
+    cooking_time = models.PositiveIntegerField(help_text="Cooking time (minutes)")
+    servings = models.PositiveIntegerField()
+    difficulty = models.PositiveSmallIntegerField(choices=Difficulty_Type.choices)
+    meal_type = models.PositiveSmallIntegerField(choices=Meal_Type.choices)
+    image = models.ImageField(upload_to='recipes/', null=True, blank=True)
+    video_url = models.URLField(blank=True, null=True, help_text="Video Link (YouTube vb.)") 
+    category = models.ForeignKey(MealCategory, on_delete=models.CASCADE, related_name='recipes')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='recipes')
+    approved_by = models.ForeignKey(  
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='approved_recipes'
+    )
+    dietary_tags = models.ManyToManyField(DietaryTag, blank=True, related_name='recipes')
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['title']),
+            models.Index(fields=['category']),
+            models.Index(fields=['meal_type']),
+            models.Index(fields=['difficulty']),
+        ]
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def total_calories(self):
+        return sum(ingredient.quantity * ingredient.ingredient.calories_per_100g / 100 
+                  for ingredient in self.ingredients.all())
+
+    @property
+    def total_protein(self):
+        return sum(ingredient.quantity * ingredient.ingredient.protein_per_100g / 100 
+                  for ingredient in self.ingredients.all())
+
+    @property
+    def total_carbs(self):
+        return sum(ingredient.quantity * ingredient.ingredient.carbs_per_100g / 100 
+                  for ingredient in self.ingredients.all())
+
+    @property
+    def total_fat(self):
+        return sum(ingredient.quantity * ingredient.ingredient.fat_per_100g / 100 
+                  for ingredient in self.ingredients.all())
+
+    @property
+    def estimated_total_time(self):
+        return self.preparation_time + self.cooking_time
