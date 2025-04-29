@@ -17,3 +17,14 @@ class MealCategorySerializer(serializers.ModelSerializer):
         model = MealCategory
         fields = ['id', 'name', 'description', 'image', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
+
+class IngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ingredient
+        fields = [
+            'id', 'name', 'description',
+            'calories_per_100g', 'protein_per_100g',
+            'carbs_per_100g', 'fat_per_100g',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
