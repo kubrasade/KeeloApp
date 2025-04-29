@@ -150,3 +150,14 @@ class FavoriteRecipe(models.Model):
 
     class Meta:
         unique_together = ['user', 'recipe']
+
+
+class MacroGoal(BaseModel):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='macro_goal')
+    daily_calories = models.PositiveIntegerField()
+    daily_protein = models.FloatField()
+    daily_carbs = models.FloatField()
+    daily_fat = models.FloatField()
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} goals"
