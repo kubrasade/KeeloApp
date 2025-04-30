@@ -104,7 +104,35 @@ class WorkoutExercise(BaseModel):
     def __str__(self):
         return f"{self.workout.name} - {self.exercise.name}"
     
+class WorkoutPlan(BaseModel):
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    difficulty = models.PositiveSmallIntegerField(choices=Difficulty_Type.choices)
+    duration_weeks = models.PositiveIntegerField()
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_plans')
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='approved_plans'
+    )
+    target_muscle_groups = models.ManyToManyField(MuscleGroup, related_name='workout_plans')
+    equipment_needed = models.ManyToManyField(Equipment, related_name='workout_plans', blank=True)
+    is_personalized = models.BooleanField(default=False)
+    client = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='personalized_plans'
+    )
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
 
 
 
-    
