@@ -2,6 +2,7 @@ from django.db import models
 from core.models import BaseModel
 from core.enums import Difficulty_Type
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class ExerciseCategory(BaseModel):
     name = models.CharField(max_length=100, unique=True)
@@ -146,5 +147,26 @@ class WorkoutPlanDay(BaseModel):
 
     def __str__(self):
         return f"{self.plan.name} - Day {self.day_number}"
+
+class Progress(BaseModel):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='progress_records')
+    workout = models.ForeignKey(Workout, on_delete=models.CASCADE)
+    date = models.DateField()
+    completed = models.BooleanField(default=False)
+    notes = models.TextField(blank=True)
+    duration = models.PositiveIntegerField(help_text="Actual duration in minutes", null=True, blank=True)
+    rating = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        ordering = ['-date']
+        unique_together = ['user', 'workout', 'date']
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.workout.name} - {self.date}"
+
 
 
