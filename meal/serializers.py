@@ -48,7 +48,12 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         model = RecipeIngredient
         fields = ['id', 'ingredient', 'ingredient_id', 'quantity', 'unit', 'unit_display', 'notes']
         read_only_fields = ['id']
-
+    
+class RecipeListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ['id', 'title', 'image']
+        
 class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(many=True, required=False)
     category = MealCategorySerializer(read_only=True)
@@ -115,7 +120,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return instance
     
 class MealPlanSerializer(serializers.ModelSerializer):
-    recipe = RecipeSerializer(read_only=True)
+    recipe = RecipeListSerializer(read_only=True)
     recipe_id = serializers.PrimaryKeyRelatedField(
         queryset=Recipe.objects.all(),
         source='recipe',
@@ -145,11 +150,7 @@ class RecipeRatingSerializer(serializers.ModelSerializer):
         model = RecipeRating
         fields = ['id', 'rating', 'comment', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at', 'user', 'recipe']
-    
-class RecipeListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recipe
-        fields = ['id', 'title', 'image']
+
         
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
     recipe = RecipeListSerializer(read_only=True)
