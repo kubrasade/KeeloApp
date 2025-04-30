@@ -58,23 +58,24 @@ class RecipeService:
         results = list(queryset)
         cache.set(cache_key, results, settings.CACHE_TTL)
         return results
-
     @staticmethod
     def get_popular_recipes(limit=10):
         cache_key = f'popular_recipes_{limit}'
         cached_recipes = cache.get(cache_key)
-        
         if cached_recipes:
             return cached_recipes
-
+    
         recipes = Recipe.objects.annotate(
             rating_count=Count('ratings'),
             avg_rating=Avg('ratings__rating')
-        ).order_by('-rating_count', '-avg_rating')[:limit]
-
+        ).filter(
+            rating_count__gt=0
+        ).order_by(
+            '-avg_rating', '-rating_count'
+        )[:limit]
+    
         cache.set(cache_key, recipes, settings.CACHE_TTL)
         return recipes
-    
 
     @staticmethod
     def approve_recipe(user, recipe):
