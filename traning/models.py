@@ -168,5 +168,23 @@ class Progress(BaseModel):
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.workout.name} - {self.date}"
 
+class PerformanceMetric(BaseModel):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='performance_metrics')
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
+    date = models.DateField()
+    weight = models.FloatField(help_text="Weight in kg", null=True, blank=True)
+    reps = models.PositiveIntegerField(null=True, blank=True)
+    sets = models.PositiveIntegerField(null=True, blank=True)
+    duration = models.PositiveIntegerField(help_text="Duration in seconds", null=True, blank=True)
+    distance = models.FloatField(help_text="Distance in meters", null=True, blank=True)
+    notes = models.TextField(blank=True)
 
+    class Meta:
+        ordering = ['-date']
+        indexes = [
+            models.Index(fields=['user', 'exercise', 'date']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.exercise.name} - {self.date}" 
 
