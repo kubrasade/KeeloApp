@@ -169,10 +169,25 @@ class MacroGoalService:
     def get_user_macro_goal(user):
         return getattr(user, 'macro_goal', None)
 
+
     @staticmethod
     def update_macro_goal(user, data):
-        macro_goal, created = MacroGoal.objects.get_or_create(user=user)
-        for attr, value in data.items():
-            setattr(macro_goal, attr, value)
-        macro_goal.save()
+        defaults = {
+            'daily_calories': 2000,
+            'daily_protein': 100,
+            'daily_carbs': 250,
+            'daily_fat': 70,
+        }
+
+        macro_goal, created = MacroGoal.objects.get_or_create(
+            user=user,
+            defaults=defaults
+        )
+
+        if not created:
+            for field, default_value in defaults.items():
+                value = data.get(field, getattr(macro_goal, field, default_value))
+                setattr(macro_goal, field, value)
+            macro_goal.save()
+
         return macro_goal
