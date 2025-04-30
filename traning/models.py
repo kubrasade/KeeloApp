@@ -134,5 +134,17 @@ class WorkoutPlan(BaseModel):
     def __str__(self):
         return self.name
 
+class WorkoutPlanDay(BaseModel):
+    plan = models.ForeignKey(WorkoutPlan, on_delete=models.CASCADE, related_name='plan_days')
+    day_number = models.PositiveIntegerField()
+    workout = models.ForeignKey(Workout, on_delete=models.CASCADE)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['day_number']
+        unique_together = ['plan', 'day_number']
+
+    def __str__(self):
+        return f"{self.plan.name} - Day {self.day_number}"
 
 
