@@ -89,4 +89,22 @@ class Workout(BaseModel):
     def __str__(self):
         return self.name
 
+class WorkoutExercise(BaseModel):
+    workout = models.ForeignKey(Workout, on_delete=models.CASCADE, related_name='workout_exercises')
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
+    sets = models.PositiveIntegerField()
+    reps = models.PositiveIntegerField()
+    rest_time = models.PositiveIntegerField(help_text="Rest time in seconds")
+    order = models.PositiveIntegerField()
 
+    class Meta:
+        ordering = ['order']
+        unique_together = ['workout', 'exercise', 'order']
+
+    def __str__(self):
+        return f"{self.workout.name} - {self.exercise.name}"
+    
+
+
+
+    
