@@ -145,14 +145,6 @@ class RecipeRatingSerializer(serializers.ModelSerializer):
         model = RecipeRating
         fields = ['id', 'rating', 'comment', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at', 'user', 'recipe']
-
-    def validate(self, data):
-        if RecipeRating.objects.filter(
-            user=self.context['request'].user,
-            recipe=self.context['recipe']
-        ).exists():
-            raise serializers.ValidationError("You have already reviewed this recipe.")
-        return data
     
 class RecipeListSerializer(serializers.ModelSerializer):
     class Meta:
