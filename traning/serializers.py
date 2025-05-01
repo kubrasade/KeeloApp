@@ -180,6 +180,31 @@ class WorkoutPlanSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Client must be specified for personalized plans")
         return data
 
+class ProgressSerializer(serializers.ModelSerializer):
+    workout = WorkoutSerializer(read_only=True)
+    workout_id = serializers.PrimaryKeyRelatedField(
+        queryset=Workout.objects.all(),
+        source='workout',
+        write_only=True
+    )
+
+    class Meta:
+        model = Progress
+        fields = [
+            'id', 'workout', 'workout_id', 'date',
+            'completed', 'notes', 'duration', 'rating',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'user']
+
+    def validate(self, data):
+        if data.get('completed') and not data.get('duration'):
+            raise serializers.ValidationError("Duration is required for completed workouts")
+        return data
+
+
+
+
 
 
 
