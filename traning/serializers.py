@@ -13,6 +13,7 @@ from .models import (
 )
 from django.db.models import Avg
 from django.contrib.auth import get_user_model
+from core.enums import UserType
 
 User= get_user_model()
 
@@ -141,6 +142,43 @@ class WorkoutPlanDaySerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at']
 
+class WorkoutPlanSerializer(serializers.ModelSerializer):
+    plan_days = WorkoutPlanDaySerializer(many=True, read_only=True)
+    target_muscle_groups = MuscleGroupSerializer(many=True, read_only=True)
+    target_muscle_group_ids = serializers.PrimaryKeyRelatedField(
+        queryset=MuscleGroup.objects.all(),
+        source='target_muscle_groups',
+        write_only=True,
+        many=True
+    )
+    equipment_needed = EquipmentSerializer(many=True, read_only=True)
+    equipment_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Equipment.objects.all(),
+        source='equipment_needed',
+        write_only=True,
+        many=True
+    )
+    client = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(user_type=UserType.CLIENT),
+        required=False,
+        allow_null=True
+    )
+
+    class Meta:
+        model = WorkoutPlan
+        fields = [
+            'id', 'name', 'description', 'difficulty',
+            'duration_weeks', 'plan_days', 'target_muscle_groups',
+            'target_muscle_group_ids', 'equipment_needed',
+            'equipment_ids', 'is_personalized', 'client',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'created_by', 'approved_by']
+
+    def validate(self, data):
+        if data.get('is_personalized') and not data.get('client'):
+            raise serializers.ValidationError("Client must be specified for personalized plans")
+        return data
 
 
 
