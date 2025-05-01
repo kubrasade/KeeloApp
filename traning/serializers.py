@@ -202,6 +202,28 @@ class ProgressSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Duration is required for completed workouts")
         return data
 
+class PerformanceMetricSerializer(serializers.ModelSerializer):
+    exercise = ExerciseSerializer(read_only=True)
+    exercise_id = serializers.PrimaryKeyRelatedField(
+        queryset=Exercise.objects.all(),
+        source='exercise',
+        write_only=True
+    )
+
+    class Meta:
+        model = PerformanceMetric
+        fields = [
+            'id', 'exercise', 'exercise_id', 'date',
+            'weight', 'reps', 'sets', 'duration',
+            'distance', 'notes', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'user']
+
+    def validate(self, data):
+        exercise = data.get('exercise')
+        if not any([data.get('weight'), data.get('reps'), data.get('sets'), data.get('duration'), data.get('distance')]):
+            raise serializers.ValidationError("At least one metric (weight, reps, sets, duration, or distance) must be provided")
+        return data 
 
 
 
