@@ -18,3 +18,13 @@ class MuscleGroupSerializer(serializers.ModelSerializer):
         model = MuscleGroup
         fields = ['id', 'name', 'description', 'image', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
+
+class EquipmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Equipment
+        fields = ['id', 'name', 'description', 'image', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+
+
