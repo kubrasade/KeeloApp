@@ -66,7 +66,10 @@ class ExerciseSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at', 'created_by', 'approved_by']
 
-
+    def get_average_rating(self, obj):
+        return obj.progress_records.filter(rating__isnull=False).aggregate(
+            avg_rating=Avg('rating')
+        )['avg_rating'] or 0
 
 
 
