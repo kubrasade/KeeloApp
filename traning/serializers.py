@@ -125,7 +125,21 @@ class WorkoutSerializer(serializers.ModelSerializer):
             avg_rating=Avg('rating')
         )['avg_rating'] or 0
 
+class WorkoutPlanDaySerializer(serializers.ModelSerializer):
+    workout = WorkoutSerializer(read_only=True)
+    workout_id = serializers.PrimaryKeyRelatedField(
+        queryset=Workout.objects.all(),
+        source='workout',
+        write_only=True
+    )
 
+    class Meta:
+        model = WorkoutPlanDay
+        fields = [
+            'id', 'day_number', 'workout', 'workout_id',
+            'notes', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
 
 
 
