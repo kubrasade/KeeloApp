@@ -91,6 +91,39 @@ class WorkoutExerciseSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at']
 
+class WorkoutSerializer(serializers.ModelSerializer):
+    exercises = WorkoutExerciseSerializer(many=True, read_only=True)
+    target_muscle_groups = MuscleGroupSerializer(many=True, read_only=True)
+    target_muscle_group_ids = serializers.PrimaryKeyRelatedField(
+        queryset=MuscleGroup.objects.all(),
+        source='target_muscle_groups',
+        write_only=True,
+        many=True
+    )
+    equipment_needed = EquipmentSerializer(many=True, read_only=True)
+    equipment_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Equipment.objects.all(),
+        source='equipment_needed',
+        write_only=True,
+        many=True
+    )
+    average_rating = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Workout
+        fields = [
+            'id', 'name', 'description', 'difficulty',
+            'duration', 'exercises', 'target_muscle_groups',
+            'target_muscle_group_ids', 'equipment_needed',
+            'equipment_ids', 'average_rating', 'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'created_by', 'approved_by']
+
+    def get_average_rating(self, obj):
+        return obj.progress_records.filter(rating__isnull=False).aggregate(
+            avg_rating=Avg('rating')
+        )['avg_rating'] or 0
 
 
 
