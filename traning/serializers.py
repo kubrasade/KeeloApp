@@ -25,6 +25,23 @@ class EquipmentSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'image', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
+class ExerciseCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExerciseCategory
+        fields = ['id', 'name', 'description', 'image', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
