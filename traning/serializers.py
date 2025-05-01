@@ -12,6 +12,9 @@ from .models import (
     PerformanceMetric
 )
 from django.db.models import Avg
+from django.contrib.auth import get_user_model
+
+User= get_user_model()
 
 class MuscleGroupSerializer(serializers.ModelSerializer):
     class Meta:
@@ -71,7 +74,22 @@ class ExerciseSerializer(serializers.ModelSerializer):
             avg_rating=Avg('rating')
         )['avg_rating'] or 0
 
+class WorkoutExerciseSerializer(serializers.ModelSerializer):
+    exercise = ExerciseSerializer(read_only=True)
+    exercise_id = serializers.PrimaryKeyRelatedField(
+        queryset=Exercise.objects.all(),
+        source='exercise',
+        write_only=True
+    )
 
+    class Meta:
+        model = WorkoutExercise
+        fields = [
+            'id', 'exercise', 'exercise_id', 'sets',
+            'reps', 'rest_time', 'order', 'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
 
 
 
