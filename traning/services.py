@@ -45,23 +45,20 @@ class ExerciseService:
         results = list(queryset)
         cache.set(cache_key, results, settings.CACHE_TTL)
         return results
-
+    
     @staticmethod
     def get_popular_exercises(limit=10):
         cache_key = f'popular_exercises_{limit}'
         cached_exercises = cache.get(cache_key)
         if cached_exercises:
             return cached_exercises
-    
+
         exercises = Exercise.objects.annotate(
-            rating_count=Count('progress_records'),
-            avg_rating=Avg('progress_records__rating')
+            usage_count=Count('performance_metrics')
         ).filter(
-            rating_count__gt=0
-        ).order_by(
-            '-avg_rating', '-rating_count'
-        )[:limit]
-    
+            usage_count__gt=0
+        ).order_by('-usage_count')[:limit]
+
         cache.set(cache_key, exercises, settings.CACHE_TTL)
         return exercises
 
