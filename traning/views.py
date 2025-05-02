@@ -5,16 +5,20 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import (
     Exercise,
     Workout,
+    WorkoutPlan,
 )
 from .serializers import (
     ExerciseSerializer,
     ExerciseListSerializer,
     WorkoutListSerializer,
-    WorkoutSerializer
+    WorkoutSerializer,
+    WorkoutPlanSerializer,
+    WorkoutPlanListSerializer,
 )
 from .services import (
     ExerciseService,
-    WorkoutService
+    WorkoutService,
+    WorkoutPlanService,
 )
 
 from core.enums import UserType
@@ -86,5 +90,34 @@ class RecommendedWorkoutsView(generics.ListAPIView):
             'difficulty': self.request.query_params.get('difficulty')
         }
         return WorkoutService.get_recommended_workouts(self.request.user, limit, filters)
+
+class WorkoutPlanListView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return WorkoutPlanListSerializer
+        return WorkoutPlanSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff or user.user_type == UserType.ADMIN:
+            return WorkoutPlan.objects.all()
+        if user.user_type == UserType.CLIENT:
+            return WorkoutPlanService.get_client_plans(user)
+        if user.user_type == UserType.DIETITIAN:
+            return WorkoutPlan.objects.filter(created_by=user)
+        return WorkoutPlan.objects.none()
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.user_type == UserType.CLIENT:
+            serializer.save(created_by=self.request.user, client=self.request.user, is_personalized=False)
+        else:
+            serializer.save(created_by=user, is_personalized=False)
+
+
+
+
 
 

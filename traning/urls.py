@@ -4,7 +4,8 @@ from .views import (
     ExerciseSearchView,
     PopularExercisesView,
     WorkoutListView,
-    RecommendedWorkoutsView
+    RecommendedWorkoutsView,
+    WorkoutPlanListView,
 )
 
 urlpatterns = [
@@ -13,8 +14,8 @@ urlpatterns = [
     path('exercises/popular/', PopularExercisesView.as_view(), name='popular-exercise'),
 
     path('workout/', WorkoutListView.as_view(), name='workout-list-create'),
-    path('workout/recommended/', RecommendedWorkoutsView.as_view(), name='recommended-workout')
+    path('workout/recommended/', RecommendedWorkoutsView.as_view(), name='recommended-workout'),
 
-    
+    path("workoutplan/", WorkoutPlanListView.as_view(), name="workoutplan-list-create")    
 
 ]
