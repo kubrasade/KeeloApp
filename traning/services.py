@@ -77,27 +77,28 @@ class WorkoutService:
         return workout
 
     @staticmethod
-    def get_recommended_workouts(user, limit=5):
+    def get_recommended_workouts(user, limit=5, filters=None):
         cache_key = f'recommended_workouts_{user.id}_{limit}'
         cached_workouts = cache.get(cache_key)
         if cached_workouts:
             return cached_workouts
 
-        recent_metrics = PerformanceMetric.objects.filter(
-            user=user,
-            date__gte=timezone.now() - timedelta(days=30)
-        )
-
-        avg_performance = recent_metrics.aggregate(
-            avg_weight=Avg('weight'),
-            avg_reps=Avg('reps')
-        )
+        fitness_level = getattr(user, 'fitness_level', 1)
 
         workouts = Workout.objects.filter(
-            difficulty__lte=user.fitness_level + 1
-        ).annotate(
+            approved_by__isnull=False,
+            difficulty__lte=fitness_level + 1
+        )
+
+        if filters:
+            if filters.get('difficulty'):
+                workouts = workouts.filter(difficulty=filters['difficulty'])
+
+        workouts = workouts.annotate(
             rating_count=Count('progress_records'),
             avg_rating=Avg('progress_records__rating')
+        ).filter(
+            rating_count__gt=0
         ).order_by(
             '-avg_rating', '-rating_count'
         )[:limit]
