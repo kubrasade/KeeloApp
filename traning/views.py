@@ -4,13 +4,17 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import (
     Exercise,
+    Workout,
 )
 from .serializers import (
     ExerciseSerializer,
-    ExerciseListSerializer
+    ExerciseListSerializer,
+    WorkoutListSerializer,
+    WorkoutSerializer
 )
 from .services import (
     ExerciseService,
+    WorkoutService
 )
 
 from core.enums import UserType
@@ -56,8 +60,31 @@ class PopularExercisesView(generics.ListAPIView):
         return ExerciseService.get_popular_exercises(limit)
 
 
+class WorkoutListView(generics.ListCreateAPIView):
+    serializer_class = WorkoutListSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['difficulty']
+    search_fields = ['name', 'description']
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff or user.user_type == UserType.ADMIN:
+            return Workout.objects.all()
+        return Workout.objects.filter(approved_by__isnull=False)
 
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
 
+class RecommendedWorkoutsView(generics.ListAPIView):
+    serializer_class = WorkoutListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        limit = int(self.request.query_params.get('limit', 5))
+        filters = {
+            'difficulty': self.request.query_params.get('difficulty')
+        }
+        return WorkoutService.get_recommended_workouts(self.request.user, limit, filters)
 
 
