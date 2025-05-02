@@ -108,6 +108,32 @@ class WorkoutService:
         cache.set(cache_key, workouts, settings.CACHE_TTL)
         return workouts
 
+class WorkoutPlanService:
+    @staticmethod
+    def create_personalized_plan(user, client, data):
+        if not (user.is_staff or user.user_type in [UserType.DIETITIAN, UserType.ADMIN]):
+            raise exceptions.PermissionDenied("Only dietitians or admins can create personalized plans.")
+
+        data['is_personalized'] = True
+        data['client'] = client
+        plan = WorkoutPlan.objects.create(created_by=user, **data)
+        return plan
+
+    @staticmethod
+    def get_client_plans(client):
+        return WorkoutPlan.objects.filter(
+            Q(client=client) | Q(is_personalized=False)
+        ).order_by('-created_at')
+
+    @staticmethod
+    def get_weekly_schedule(plan, week_number):
+        start_day = (week_number - 1) * 7 + 1
+        end_day = start_day + 6
+
+        return WorkoutPlanDay.objects.filter(
+            plan=plan,
+            day_number__range=(start_day, end_day)
+        ).order_by('day_number')
 
 
 
