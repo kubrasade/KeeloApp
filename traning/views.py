@@ -47,7 +47,13 @@ class ExerciseSearchView(generics.ListAPIView):
         return ExerciseService.search_exercises(query, filters)
 
 
+class PopularExercisesView(generics.ListAPIView):
+    serializer_class = ExerciseSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        limit = int(self.request.query_params.get('limit', 10))
+        return ExerciseService.get_popular_exercises(limit)
 
 
 
