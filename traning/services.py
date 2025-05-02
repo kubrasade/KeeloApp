@@ -139,6 +139,9 @@ class ProgressService:
         if Progress.objects.filter(user=user, workout=workout, date=data['date']).exists():
             raise exceptions.ValidationError("Progress for this workout and date already exists.")
         
+        data = dict(data)  
+        data.pop('workout', None)
+        
         return Progress.objects.create(user=user, workout=workout, **data)
 
     @staticmethod
