@@ -149,8 +149,8 @@ class WorkoutPlanDay(BaseModel):
         return f"{self.plan.name} - Day {self.day_number}"
 
 class Progress(BaseModel):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='progress_records')
-    workout = models.ForeignKey(Workout, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='progress_records_by_user')
+    workout = models.ForeignKey(Workout, on_delete=models.CASCADE, related_name= 'progress_records')
     date = models.DateField()
     completed = models.BooleanField(default=False)
     notes = models.TextField(blank=True)
