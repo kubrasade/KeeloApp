@@ -21,3 +21,25 @@ class ChatRoom(BaseModel):
 
     def __str__(self):
         return f'Chat between {self.client.get_full_name()} and {self.dietitian.get_full_name()}'
+    
+
+class Message(BaseModel):
+    chat_room = models.ForeignKey(
+        ChatRoom,
+        on_delete=models.CASCADE,
+        related_name='messages'
+    )
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sent_messages'
+    )
+    content = models.TextField()
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'Message from {self.sender.get_full_name()} at {self.created_at.strftime("%Y-%m-%d %H:%M")}'
+
+
