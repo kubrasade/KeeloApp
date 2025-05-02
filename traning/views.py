@@ -166,7 +166,20 @@ class WorkoutPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
         else:
             raise PermissionDenied("You don't have permission to delete this plan.")
            
+class WeeklyScheduleView(generics.ListAPIView):
+    serializer_class = WorkoutPlanDaySerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        plan_id = self.kwargs.get('plan_id')
+        plan = get_object_or_404(WorkoutPlan, id=plan_id)
+
+        try:
+            week_number = int(self.request.query_params.get('week', 1))
+        except ValueError:
+            week_number = 1
+
+        return WorkoutPlanService.get_weekly_schedule(plan, week_number)
 
 
 
