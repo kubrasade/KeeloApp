@@ -9,5 +9,6 @@ urlpatterns = [
     path('api/auth/', include('authub.urls')),
     path('api/match/', include('match.urls')),
     path('api/notifications/', include('notifications.urls')),
-    path('api/meal/', include('meal.urls'))
+    path('api/meal/', include('meal.urls')),
+    path('api/traning/',include('traning.urls'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
