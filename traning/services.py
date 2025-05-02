@@ -135,6 +135,24 @@ class WorkoutPlanService:
             day_number__range=(start_day, end_day)
         ).order_by('day_number')
 
+class ProgressService:
+    @staticmethod
+    def record_workout_progress(user, workout, data):
+        if Progress.objects.filter(user=user, workout=workout, date=data['date']).exists():
+            raise exceptions.ValidationError("Progress for this workout and date already exists.")
+        
+        return Progress.objects.create(user=user, workout=workout, **data)
+
+    @staticmethod
+    def get_workout_history(user, start_date=None, end_date=None):
+        queryset = Progress.objects.filter(user=user)
+        
+        if start_date:
+            queryset = queryset.filter(date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(date__lte=end_date)
+            
+        return queryset.order_by('-date')
 
 
 
