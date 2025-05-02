@@ -160,6 +160,12 @@ class WorkoutPlanDaySerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at']
 
+class WorkoutPlanListSerializer(serializers.ModelSerializer):
+    client = serializers.PrimaryKeyRelatedField(read_only=True)
+    class Meta:
+        model = WorkoutPlan
+        fields = ['id', 'name', 'difficulty', 'duration_weeks', 'client']
+
 class WorkoutPlanSerializer(serializers.ModelSerializer):
     plan_days = WorkoutPlanDaySerializer(many=True, read_only=True)
     target_muscle_groups = MuscleGroupSerializer(many=True, read_only=True)
