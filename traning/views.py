@@ -228,14 +228,14 @@ class PerformanceMetricListView(generics.ListCreateAPIView):
             self.request.user, exercise, serializer.validated_data
         )
 
+class ExerciseProgressView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
 
-
-
-
-
-
-
-
-
-
-
+    def get(self, request, *args, **kwargs):
+        exercise_id = self.kwargs.get('exercise_id')
+        exercise = get_object_or_404(Exercise, id=exercise_id)
+        stats = PerformanceMetricService.calculate_progress_stats(
+            self.request.user,
+            exercise
+        )
+        return Response(stats)

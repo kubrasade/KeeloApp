@@ -10,6 +10,7 @@ from .views import (
     WeeklyScheduleView,
     ProgressListView,
     PerformanceMetricListView,
+    ExerciseProgressView
 )
 
 urlpatterns = [
@@ -27,5 +28,5 @@ urlpatterns = [
     path('progress/', ProgressListView.as_view(), name='progress-list-create'),
 
     path('exercises/<int:exercise_id>/metrics/', PerformanceMetricListView.as_view(), name='exercise-metrics'),
-
+    path('exercises/<int:exercise_id>/progress/', ExerciseProgressView.as_view(), name='exercise-progress'),
 ]
