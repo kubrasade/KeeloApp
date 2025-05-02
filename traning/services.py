@@ -72,3 +72,45 @@ class ExerciseService:
         exercise.approved_by = user
         exercise.save()
         return exercise
+    
+class WorkoutService:
+    @staticmethod
+    def create_workout(user, data):
+        workout = Workout.objects.create(created_by=user, **data)
+        return workout
+
+    @staticmethod
+    def get_recommended_workouts(user, limit=5):
+        cache_key = f'recommended_workouts_{user.id}_{limit}'
+        cached_workouts = cache.get(cache_key)
+        if cached_workouts:
+            return cached_workouts
+
+        recent_metrics = PerformanceMetric.objects.filter(
+            user=user,
+            date__gte=timezone.now() - timedelta(days=30)
+        )
+
+        avg_performance = recent_metrics.aggregate(
+            avg_weight=Avg('weight'),
+            avg_reps=Avg('reps')
+        )
+
+        workouts = Workout.objects.filter(
+            difficulty__lte=user.fitness_level + 1
+        ).annotate(
+            rating_count=Count('progress_records'),
+            avg_rating=Avg('progress_records__rating')
+        ).order_by(
+            '-avg_rating', '-rating_count'
+        )[:limit]
+
+        cache.set(cache_key, workouts, settings.CACHE_TTL)
+        return workouts
+
+
+
+
+
+
+
