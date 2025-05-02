@@ -169,8 +169,8 @@ class Progress(BaseModel):
         return f"{self.user.get_full_name()} - {self.workout.name} - {self.date}"
 
 class PerformanceMetric(BaseModel):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='performance_metrics')
-    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='performance_metrics_by_user')
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE, related_name='performance_metrics')
     date = models.DateField()
     weight = models.FloatField(help_text="Weight in kg", null=True, blank=True)
     reps = models.PositiveIntegerField(null=True, blank=True)
