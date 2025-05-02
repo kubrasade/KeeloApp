@@ -2,6 +2,9 @@ from rest_framework import generics, status, filters
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import get_object_or_404
+from core.enums import UserType
+from rest_framework.exceptions import PermissionDenied
 from .models import (
     Exercise,
     Workout,
@@ -14,16 +17,13 @@ from .serializers import (
     WorkoutSerializer,
     WorkoutPlanSerializer,
     WorkoutPlanListSerializer,
+    WorkoutPlanDaySerializer,
 )
 from .services import (
     ExerciseService,
     WorkoutService,
     WorkoutPlanService,
 )
-
-from core.enums import UserType
-
-from core.enums import UserType
 
 
 class ExerciseListView(generics.ListAPIView):
@@ -95,26 +95,90 @@ class WorkoutPlanListView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return WorkoutPlanListSerializer
-        return WorkoutPlanSerializer
+        return WorkoutPlanListSerializer if self.request.method == 'GET' else WorkoutPlanSerializer
 
     def get_queryset(self):
         user = self.request.user
+
         if user.is_staff or user.user_type == UserType.ADMIN:
             return WorkoutPlan.objects.all()
-        if user.user_type == UserType.CLIENT:
-            return WorkoutPlanService.get_client_plans(user)
+
         if user.user_type == UserType.DIETITIAN:
             return WorkoutPlan.objects.filter(created_by=user)
+
+        if user.user_type == UserType.CLIENT:
+            return WorkoutPlanService.get_client_plans(user)
+
         return WorkoutPlan.objects.none()
 
     def perform_create(self, serializer):
         user = self.request.user
+
         if user.user_type == UserType.CLIENT:
-            serializer.save(created_by=self.request.user, client=self.request.user, is_personalized=False)
+            serializer.save(
+                created_by=user,
+                client=user,
+                is_personalized=False
+            )
         else:
-            serializer.save(created_by=user, is_personalized=False)
+            serializer.save(created_by=user)
+
+class WorkoutPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = WorkoutPlanSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_staff or user.user_type == UserType.ADMIN:
+            return WorkoutPlan.objects.all()
+
+        if user.user_type == UserType.DIETITIAN:
+            return WorkoutPlan.objects.filter(created_by=user)
+
+        if user.user_type == UserType.CLIENT:
+            return WorkoutPlan.objects.filter(client=user)
+
+        return WorkoutPlan.objects.none()
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        instance = self.get_object()
+
+        if (
+            user.user_type == UserType.ADMIN
+            or (user.user_type == UserType.DIETITIAN and instance.created_by == user)
+            or (user.user_type == UserType.CLIENT and instance.client == user)
+        ):
+            serializer.save()
+        else:
+            raise PermissionDenied("You don't have permission to update this plan.")
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+
+        if (
+            user.user_type == UserType.ADMIN
+            or (user.user_type == UserType.DIETITIAN and instance.created_by == user)
+            or (user.user_type == UserType.CLIENT and instance.client == user)
+        ):
+            instance.delete()
+        else:
+            raise PermissionDenied("You don't have permission to delete this plan.")
+           
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

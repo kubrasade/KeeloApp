@@ -6,6 +6,7 @@ from .views import (
     WorkoutListView,
     RecommendedWorkoutsView,
     WorkoutPlanListView,
+    WorkoutPlanDetailView,
 )
 
 urlpatterns = [
@@ -16,6 +17,7 @@ urlpatterns = [
     path('workout/', WorkoutListView.as_view(), name='workout-list-create'),
     path('workout/recommended/', RecommendedWorkoutsView.as_view(), name='recommended-workout'),
 
-    path("workoutplan/", WorkoutPlanListView.as_view(), name="workoutplan-list-create")    
+    path('workoutplan/', WorkoutPlanListView.as_view(), name="workoutplan-list-create"), 
+    path('workoutplan/detail/<int:pk>/', WorkoutPlanDetailView.as_view(), name= 'workoutplan-detail'),  
 
 ]
