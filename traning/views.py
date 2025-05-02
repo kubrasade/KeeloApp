@@ -18,13 +18,15 @@ from .serializers import (
     WorkoutPlanSerializer,
     WorkoutPlanListSerializer,
     WorkoutPlanDaySerializer,
-    ProgressSerializer
+    ProgressSerializer,
+    PerformanceMetricSerializer,
 )
 from .services import (
     ExerciseService,
     WorkoutService,
     WorkoutPlanService,
     ProgressService,
+    PerformanceMetricService,
 )
 
 
@@ -204,9 +206,27 @@ class ProgressListView(generics.ListCreateAPIView):
             serializer.validated_data
         )
 
+class PerformanceMetricListView(generics.ListCreateAPIView):
+    serializer_class = PerformanceMetricSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        exercise_id = self.kwargs.get('exercise_id')
+        exercise = get_object_or_404(Exercise, id=exercise_id)
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
 
+        return PerformanceMetricService.get_exercise_progress(
+            self.request.user, exercise, start_date, end_date
+        )
 
+    def perform_create(self, serializer):
+        exercise_id = self.kwargs.get('exercise_id')
+        exercise = get_object_or_404(Exercise, id=exercise_id)
+
+        PerformanceMetricService.record_metric(
+            self.request.user, exercise, serializer.validated_data
+        )
 
 
 

@@ -158,37 +158,31 @@ class ProgressService:
 class PerformanceMetricService:
     @staticmethod
     def record_metric(user, exercise, data):
+        data.pop('exercise', None)  
+        data.pop('user', None)      
         return PerformanceMetric.objects.create(user=user, exercise=exercise, **data)
 
     @staticmethod
     def get_exercise_progress(user, exercise, start_date=None, end_date=None):
         queryset = PerformanceMetric.objects.filter(user=user, exercise=exercise)
-        
         if start_date:
             queryset = queryset.filter(date__gte=start_date)
         if end_date:
             queryset = queryset.filter(date__lte=end_date)
-            
         return queryset.order_by('date')
 
     @staticmethod
     def calculate_progress_stats(user, exercise):
         metrics = PerformanceMetric.objects.filter(user=user, exercise=exercise)
-        
         if not metrics.exists():
             return None
-            
-        stats = {
+
+        return {
             'total_workouts': metrics.count(),
             'max_weight': metrics.aggregate(max_weight=Max('weight'))['max_weight'],
             'max_reps': metrics.aggregate(max_reps=Max('reps'))['max_reps'],
             'avg_weight': metrics.aggregate(avg_weight=Avg('weight'))['avg_weight'],
             'avg_reps': metrics.aggregate(avg_reps=Avg('reps'))['avg_reps'],
-            'last_workout': metrics.latest('date').date
+            'last_workout': metrics.order_by('-date').first().date
         }
-        
-        return stats 
-
-
-
-
+    
