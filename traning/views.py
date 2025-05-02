@@ -18,11 +18,13 @@ from .serializers import (
     WorkoutPlanSerializer,
     WorkoutPlanListSerializer,
     WorkoutPlanDaySerializer,
+    ProgressSerializer
 )
 from .services import (
     ExerciseService,
     WorkoutService,
     WorkoutPlanService,
+    ProgressService,
 )
 
 
@@ -181,7 +183,26 @@ class WeeklyScheduleView(generics.ListAPIView):
 
         return WorkoutPlanService.get_weekly_schedule(plan, week_number)
 
+class ProgressListView(generics.ListCreateAPIView):
+    serializer_class = ProgressSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+        return ProgressService.get_workout_history(
+            self.request.user,
+            start_date,
+            end_date
+        )
+
+    def perform_create(self, serializer):
+        workout = serializer.validated_data['workout']
+        ProgressService.record_workout_progress(
+            self.request.user,
+            workout,
+            serializer.validated_data
+        )
 
 
 

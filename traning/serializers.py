@@ -205,7 +205,7 @@ class WorkoutPlanSerializer(serializers.ModelSerializer):
         return data
 
 class ProgressSerializer(serializers.ModelSerializer):
-    workout = WorkoutSerializer(read_only=True)
+    workout = WorkoutListSerializer(read_only=True)
     workout_id = serializers.PrimaryKeyRelatedField(
         queryset=Workout.objects.all(),
         source='workout',
