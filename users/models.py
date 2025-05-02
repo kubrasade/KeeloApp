@@ -48,6 +48,7 @@ class User(AbstractUser, BaseModel):
     is_verified = models.BooleanField(default=False)
     notification_preferences = models.JSONField(default=default_notification_preferences, blank=True)
     language_preference = models.CharField(max_length=10, default='tr')
+    fitness_level = models.PositiveSmallIntegerField(choices=FitnessLevel.choices, default=FitnessLevel.LOW)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
