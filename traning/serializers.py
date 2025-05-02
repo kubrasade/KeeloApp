@@ -56,7 +56,6 @@ class ExerciseSerializer(serializers.ModelSerializer):
         write_only=True,
         many=True
     )
-    average_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Exercise
@@ -65,18 +64,25 @@ class ExerciseSerializer(serializers.ModelSerializer):
             'difficulty', 'category', 'category_id',
             'video_url', 'image', 'target_muscle_groups',
             'target_muscle_group_ids', 'equipment_needed',
-            'equipment_ids', 'average_rating', 'created_at',
+            'equipment_ids', 'created_at',
             'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at', 'created_by', 'approved_by']
 
-    def get_average_rating(self, obj):
-        return obj.progress_records.filter(rating__isnull=False).aggregate(
-            avg_rating=Avg('rating')
-        )['avg_rating'] or 0
+class ExerciseListSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    main_muscle = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Exercise
+        fields = ['id', 'name', 'difficulty', 'category_name', 'main_muscle']
+
+    def get_main_muscle(self, obj):
+        first_muscle = obj.target_muscle_groups.first()
+        return first_muscle.name if first_muscle else None
 
 class WorkoutExerciseSerializer(serializers.ModelSerializer):
-    exercise = ExerciseSerializer(read_only=True)
+    exercise = ExerciseListSerializer(read_only=True)
     exercise_id = serializers.PrimaryKeyRelatedField(
         queryset=Exercise.objects.all(),
         source='exercise',
