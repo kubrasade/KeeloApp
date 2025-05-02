@@ -43,3 +43,21 @@ class Message(BaseModel):
         return f'Message from {self.sender.get_full_name()} at {self.created_at.strftime("%Y-%m-%d %H:%M")}'
 
 
+class MessageRead(BaseModel):
+    message = models.ForeignKey(
+        Message,
+        on_delete=models.CASCADE,
+        related_name='read_by'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='read_messages'
+    )
+    read_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('message', 'user')
+
+    def __str__(self):
+        return f'Message {self.message.id} read by {self.user.get_full_name()}'
