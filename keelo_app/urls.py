@@ -11,4 +11,4 @@ urlpatterns = [
     path('api/notifications/', include('notifications.urls')),
     path('api/meal/', include('meal.urls')),
     path('api/traning/',include('traning.urls'))
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
