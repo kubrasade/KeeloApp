@@ -30,6 +30,7 @@ THIRD_PARTY_APPS = [
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
     'django_filters',
+    'channels',
 ]
 
 LOCAL_APPS =[
@@ -167,3 +168,13 @@ CACHE_TTL = 60 * 60
 RATING_WEIGHT = 0.4
 EXPERIENCE_WEIGHT = 0.3
 REVIEW_COUNT_WEIGHT = 0.3
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    },
+}
