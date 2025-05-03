@@ -49,7 +49,7 @@ class User(AbstractUser, BaseModel):
     notification_preferences = models.JSONField(default=default_notification_preferences, blank=True)
     language_preference = models.CharField(max_length=10, default='tr')
     fitness_level = models.PositiveSmallIntegerField(choices=FitnessLevel.choices, default=FitnessLevel.LOW)
-
+    is_online = models.BooleanField(default=False)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
