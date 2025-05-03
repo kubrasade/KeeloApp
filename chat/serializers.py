@@ -32,3 +32,31 @@ class MessageSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+class ChatRoomSerializer(serializers.ModelSerializer):
+    client = UserSerializer(read_only=True)
+    dietitian = UserSerializer(read_only=True)
+    last_message = serializers.SerializerMethodField()
+    unread_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ChatRoom
+        fields = ['id', 'client', 'dietitian', 'created_at', 'last_message', 'unread_count']
+        read_only_fields = ['id', 'created_at']
+
+    def get_last_message(self, obj):
+        last_message = obj.messages.order_by('-created_at').first()
+        if last_message:
+            return {
+                'content': last_message.content,
+                'created_at': last_message.created_at,
+                'sender_id': last_message.sender.id
+            }
+        return None
+
+    def get_unread_count(self, obj):
+        user = self.context['request'].user
+        return MessageRead.objects.filter(
+            message__chat_room=obj,
+        ).exclude(user=user).count()
+
+
