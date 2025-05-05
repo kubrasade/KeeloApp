@@ -68,14 +68,23 @@ class AuthService:
         
         if not user.is_active:
             raise exceptions.AuthenticationFailed('Your account is not active. Please verify your email.')
-        
+
+        if user.user_type == UserType.CLIENT:  
+            print("Client logged in")
+        elif user.user_type == UserType.DIETITIAN:  
+            print("Dietitian logged in")
+        elif user.user_type == UserType.ADMIN:  
+            print("Admin logged in")
+        else:
+            raise exceptions.AuthenticationFailed('Invalid user type.')
+
         refresh = RefreshToken.for_user(user)
         
         return {
+            'user_type': user.user_type,
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }
-
 
     @staticmethod
     def request_password_reset(email):
