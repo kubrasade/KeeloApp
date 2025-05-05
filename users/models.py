@@ -39,7 +39,7 @@ class User(AbstractUser, BaseModel):
     user_type = models.PositiveSmallIntegerField(choices=UserType.choices, default=UserType.CLIENT)
     phone_number = models.CharField(max_length=15, blank=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
-    gender = models.CharField(max_length=10, choices=Gender.choices, blank=True, null=True)
+    gender = models.PositiveSmallIntegerField(choices=Gender.choices, blank=True, null=True)
     birth_date = models.DateField(null=True, blank=True)
     address = models.TextField(blank=True)
     city = models.CharField(max_length=50, blank=True)
@@ -76,6 +76,14 @@ class User(AbstractUser, BaseModel):
 
     def is_admin(self):
         return self.user_type == UserType.ADMIN
+    
+    def get_initials(self):
+        initials = ""
+        if self.first_name:
+            initials += self.first_name[0].upper() 
+        if self.last_name:
+            initials += self.last_name[0].upper() 
+        return initials
     
 class Specialization(BaseModel):
     code = models.SlugField(max_length=50, unique=True, help_text=_("Unique identifier for the specialization"))
