@@ -128,6 +128,7 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.SearchFilter',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8000")
@@ -177,4 +178,10 @@ CHANNEL_LAYERS = {
             "hosts": [("redis", 6379)],
         },
     },
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Dietitian Systems API',
+    'DESCRIPTION': 'API documentation for Dietitian Systems',
+    'VERSION': '1.0.0',
 }
