@@ -58,23 +58,24 @@ class ChatRoomSerializer(serializers.ModelSerializer):
         return MessageRead.objects.filter(
             message__chat_room=obj,
         ).exclude(user=user).count()
-
-
+    
 class ChatRoomCreateSerializer(serializers.ModelSerializer):
-    client_id = serializers.IntegerField(write_only=True)
     dietitian_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = ChatRoom
-        fields = ['id', 'client_id', 'dietitian_id', 'created_at']
+        fields = ['id', 'dietitian_id', 'created_at']
         read_only_fields = ['id', 'created_at']
 
     def validate(self, data):
-        if data['client_id'] == data['dietitian_id']:
+        request = self.context.get('request')
+        if not request or request.user.id == data['dietitian_id']:
             raise serializers.ValidationError("Client and dietitian cannot be the same user.")
         return data
 
     def create(self, validated_data):
-        client = User.objects.get(id=validated_data.pop('client_id'))
-        dietitian = User.objects.get(id=validated_data.pop('dietitian_id'))
+        request = self.context.get('request')
+        client = request.user.userprofile
+        dietitian_user = User.objects.get(id=validated_data.pop('dietitian_id'))
+        dietitian = dietitian_user.dietitianprofile
         return ChatRoom.objects.create(client=client, dietitian=dietitian)
