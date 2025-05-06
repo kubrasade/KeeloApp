@@ -38,16 +38,7 @@ class User(AbstractUser, BaseModel):
     email = models.EmailField(_('email address'), unique=True, blank=False)
     user_type = models.PositiveSmallIntegerField(choices=UserType.choices, default=UserType.CLIENT)
     phone_number = models.CharField(max_length=15, blank=True)
-    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
-    gender = models.PositiveSmallIntegerField(choices=Gender.choices, blank=True, null=True)
-    birth_date = models.DateField(null=True, blank=True)
-    address = models.TextField(blank=True)
-    city = models.CharField(max_length=50, blank=True)
-    country = models.CharField(max_length=50, blank=True)
-    postal_code = models.CharField(max_length=10, blank=True)
     is_verified = models.BooleanField(default=False)
-    notification_preferences = models.JSONField(default=default_notification_preferences, blank=True)
-    language_preference = models.CharField(max_length=10, default='tr')
     fitness_level = models.PositiveSmallIntegerField(choices=FitnessLevel.choices, default=FitnessLevel.LOW)
     is_online = models.BooleanField(default=False)
     USERNAME_FIELD = 'email'
@@ -84,7 +75,19 @@ class User(AbstractUser, BaseModel):
         if self.last_name:
             initials += self.last_name[0].upper() 
         return initials
-    
+
+class UserProfile(models.Model):
+    phone_number = models.CharField(max_length=15, blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
+    gender = models.PositiveSmallIntegerField(choices=Gender.choices, blank=True, null=True)
+    birth_date = models.DateField(null=True, blank=True)
+    address = models.JSONField(blank=True, default=dict) 
+    city = models.CharField(max_length=50, blank=True)
+    country = models.CharField(max_length=50, blank=True)
+    postal_code = models.CharField(max_length=10, blank=True)   
+    notification_preferences = models.JSONField(default=default_notification_preferences, blank=True)
+    language_preference = models.CharField(max_length=10, default='tr')
+
 class Specialization(BaseModel):
     code = models.SlugField(max_length=50, unique=True, help_text=_("Unique identifier for the specialization"))
     name = models.CharField(max_length=100, help_text=_("Display name of the specialization"))
@@ -98,7 +101,7 @@ class Specialization(BaseModel):
     def __str__(self):
         return self.name
 
-class DietitianProfile(BaseModel):
+class DietitianProfile(BaseModel, UserProfile):
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -126,7 +129,7 @@ class DietitianProfile(BaseModel):
     def __str__(self):
         return f"{self.user.get_full_name()} ({self.user.email})"
     
-class ClientProfile(BaseModel):
+class ClientProfile(BaseModel, UserProfile):
     user = models.OneToOneField(
         User, 
         on_delete=models.CASCADE, 
