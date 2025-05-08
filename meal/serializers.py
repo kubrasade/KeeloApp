@@ -131,7 +131,7 @@ class MealPlanSerializer(serializers.ModelSerializer):
         model = MealPlan
         fields = [
             'id', 'day', 'meal_type', 'recipe', 'recipe_id',
-            'date', 'notes', 'created_at', 'updated_at'
+            'date', 'notes', 'created_at', 'updated_at', 'user'
         ]
         read_only_fields = ['created_at', 'updated_at', 'user']
 

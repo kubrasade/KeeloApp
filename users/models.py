@@ -27,12 +27,6 @@ class UserManager(BaseUserManager):
             raise ValueError(_('Superuser must have is_superuser=True.'))
         return self.create_user(email, password, **extra_fields)
 
-def default_notification_preferences():
-    return {
-        "email": True,
-        "sms": False,
-        "push": True
-    }
 class User(AbstractUser, BaseModel):
     username = None
     email = models.EmailField(_('email address'), unique=True, blank=False)
@@ -76,17 +70,6 @@ class User(AbstractUser, BaseModel):
             initials += self.last_name[0].upper() 
         return initials
 
-class UserProfile(models.Model):
-    phone_number = models.CharField(max_length=15, blank=True)
-    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
-    gender = models.PositiveSmallIntegerField(choices=Gender.choices, blank=True, null=True)
-    birth_date = models.DateField(null=True, blank=True)
-    address = models.JSONField(blank=True, default=dict) 
-    city = models.CharField(max_length=50, blank=True)
-    country = models.CharField(max_length=50, blank=True)
-    postal_code = models.CharField(max_length=10, blank=True)   
-    notification_preferences = models.JSONField(default=default_notification_preferences, blank=True)
-    language_preference = models.CharField(max_length=10, default='tr')
 
 class Specialization(BaseModel):
     code = models.SlugField(max_length=50, unique=True, help_text=_("Unique identifier for the specialization"))
@@ -101,7 +84,7 @@ class Specialization(BaseModel):
     def __str__(self):
         return self.name
 
-class DietitianProfile(BaseModel, UserProfile):
+class DietitianProfile(BaseModel):
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -116,12 +99,19 @@ class DietitianProfile(BaseModel, UserProfile):
     experience_years = models.PositiveIntegerField(default=0)
     certificate_info = models.TextField(blank=True)
     consultation_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    availability = models.JSONField(default=dict)
+    availability = models.JSONField(default=dict, blank=True)
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
     total_ratings = models.PositiveIntegerField(default=0)
     website = models.URLField(blank=True)
     social_links = models.JSONField(default=dict, blank=True, null=True)
-    
+    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
+    gender = models.PositiveSmallIntegerField(choices=Gender.choices, blank=True, null=True)
+    birth_date = models.DateField(null=True, blank=True)
+    address = models.JSONField(blank=True, default=dict) 
+    city = models.CharField(max_length=50, blank=True)
+    country = models.CharField(max_length=50, blank=True)
+    postal_code = models.CharField(max_length=10, blank=True) 
+
     class Meta:
         verbose_name = _('Dietitian Profile')
         verbose_name_plural = _('Dietitian Profiles')
@@ -129,7 +119,11 @@ class DietitianProfile(BaseModel, UserProfile):
     def __str__(self):
         return f"{self.user.get_full_name()} ({self.user.email})"
     
-class ClientProfile(BaseModel, UserProfile):
+class ClientProfile(BaseModel):
+    birth_place= models.CharField(max_length=50, blank=True, null= True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
+    gender = models.PositiveSmallIntegerField(choices=Gender.choices, blank=True, null=True)
+    birth_date = models.DateField(null=True, blank=True)
     user = models.OneToOneField(
         User, 
         on_delete=models.CASCADE, 
