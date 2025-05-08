@@ -30,6 +30,7 @@ from .services import (
 from django.utils import timezone
 from datetime import datetime, timedelta
 from core.enums import UserType
+from .permissions import CanViewOnly
 
 
 class MealCategoryListView(generics.ListAPIView):
@@ -62,13 +63,10 @@ class RecipeListCreateView(generics.ListCreateAPIView):
 
 class RecipeRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RecipeSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanViewOnly]
 
     def get_queryset(self):
-        user= self.request.user
-        if user.is_staff or user.user_type == UserType.DIETITIAN:
-            return Recipe.objects.all()
-        return Recipe.objects.filter(created_by=self.request.user)
+        return Recipe.objects.all()
     
 class RecipeSearchView(generics.ListAPIView):
     serializer_class = RecipeSerializer
@@ -112,13 +110,14 @@ class MealPlanListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         start_date = self.request.query_params.get('start_date')
+        user = self.request.user  
         if start_date:
             try:
                 start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-                return MealPlanService.get_weekly_meal_plan(self.request.user, start_date)
+                return MealPlanService.get_weekly_meal_plan(user, start_date)
             except ValueError:
                 return MealPlan.objects.none()
-        return MealPlan.objects.filter(user=self.request.user)
+        return MealPlan.objects.filter(user=user)
 
     def perform_create(self, serializer):
         MealPlanService.create_meal_plan(self.request.user, serializer.validated_data)
