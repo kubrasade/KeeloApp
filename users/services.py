@@ -25,10 +25,21 @@ class DietitianProfileService:
         return profile
 
     @staticmethod
-    def update_profile(profile, **data):
-        for key, value in data.items():
+    def update_profile(profile, **validated_data):
+        # specializations'ı çıkarıyoruz
+        specializations = validated_data.pop("specializations", None)
+    
+        # Diğer alanları güncelliyoruz
+        for key, value in validated_data.items():
             setattr(profile, key, value)
+    
+        # Profilin kaydedilmesi
         profile.save()
+    
+        # Eğer specializations verisi varsa, set() ile ilişkiyi güncelliyoruz
+        if specializations is not None:
+            profile.specializations.set(specializations)
+    
         return profile
 
     @staticmethod
