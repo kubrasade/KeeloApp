@@ -221,8 +221,9 @@ class ProgressSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at', 'user']
 
+
     def validate(self, data):
-        if data.get('completed') and not data.get('duration'):
+        if 'completed' in data and data.get('completed') and not data.get('duration'):
             raise serializers.ValidationError("Duration is required for completed workouts")
         return data
 
