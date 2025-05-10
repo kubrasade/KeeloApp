@@ -9,6 +9,7 @@ from .models import (
     Exercise,
     Workout,
     WorkoutPlan,
+    Progress,
 )
 from .serializers import (
     ExerciseSerializer,
@@ -205,6 +206,19 @@ class ProgressListView(generics.ListCreateAPIView):
             workout,
             serializer.validated_data
         )
+
+class ProgressUpdateView(generics.UpdateAPIView):
+    queryset = Progress.objects.all()
+    serializer_class = ProgressSerializer
+    permission_classes = [IsAuthenticated]  
+
+    def get_object(self):
+        obj = super().get_object()
+
+        if obj.user != self.request.user and not self.request.user.is_staff:
+            raise PermissionDenied("You do not have permission to update this progress.")
+        
+        return obj
 
 class PerformanceMetricListView(generics.ListCreateAPIView):
     serializer_class = PerformanceMetricSerializer
