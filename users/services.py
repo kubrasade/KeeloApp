@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from .models import DietitianProfile, ClientProfile, Specialization, HealthMetric
+from .enums import HealthMetricType
 
 User = get_user_model()
 
@@ -26,17 +27,13 @@ class DietitianProfileService:
 
     @staticmethod
     def update_profile(profile, **validated_data):
-        # specializations'ı çıkarıyoruz
         specializations = validated_data.pop("specializations", None)
     
-        # Diğer alanları güncelliyoruz
         for key, value in validated_data.items():
             setattr(profile, key, value)
     
-        # Profilin kaydedilmesi
         profile.save()
     
-        # Eğer specializations verisi varsa, set() ile ilişkiyi güncelliyoruz
         if specializations is not None:
             profile.specializations.set(specializations)
     
@@ -86,7 +83,24 @@ class SpecializationService:
 
 class HealthMetricService:
     @staticmethod
+    def calculate_bmi(weight: float, height_cm: float) -> float:
+        height_m = height_cm / 100
+        if height_m > 0:
+            return round(weight / (height_m ** 2), 2)
+        return 0
+
+    @staticmethod
     def create_metric(client, **data):
+        if data.get('metric_type') == HealthMetricType.BMI:
+            weight = data.get('weight')
+            height = data.get('height')
+            if weight is not None and height is not None:
+                data['value'] = HealthMetricService.calculate_bmi(float(weight), float(height))
+                data['unit'] = 'kg/m2'
+                data.pop('weight', None)
+                data.pop('height', None)
+            else:
+                raise ValueError('Current weight and height are required to calculate BMI.')
         metric = HealthMetric.objects.create(client=client, **data)
         return metric
 
