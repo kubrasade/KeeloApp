@@ -38,11 +38,16 @@ class DietitianScoreSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
     total_score = serializers.SerializerMethodField()
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
+    city = serializers.CharField( read_only=True)
+    profile_picture = serializers.ImageField( read_only=True)
 
     class Meta:
         model = DietitianProfile
         fields = [
-            'id', 'user', 'specializations', 'experience_years',
+            'id', 'first_name', 'last_name', 'city', 'profile_picture',
+            'specializations', 'experience_years',
             'average_rating', 'review_count', 'total_score'
         ]
 
