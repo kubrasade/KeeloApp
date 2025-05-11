@@ -6,31 +6,25 @@ from .models import ChatRoom, Message, MessageRead
 from .serializers import (
     ChatRoomSerializer, 
     MessageSerializer,
-    MessageReadSerializer
+    MessageReadSerializer,ChatRoomCreateSerializer
 )
 from .permissions import IsClientOrDietitian
 from .permissions import IsChatRoomParticipant, IsMessageSender
+from rest_framework.parsers import MultiPartParser, FormParser
+
 
 class ChatRoomListCreateView(generics.ListCreateAPIView):
-    serializer_class = ChatRoomSerializer
+    queryset = ChatRoom.objects.all()
     permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        return ChatRoom.objects.filter(
-            Q(client__user=user) | Q(dietitian__user=user)
-        )
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return ChatRoomCreateSerializer
+        return ChatRoomSerializer
 
     def perform_create(self, serializer):
-        client = self.request.user.userprofile
-        dietitian = serializer.validated_data['dietitian']
-        chat_room, created = ChatRoom.objects.get_or_create(
-            client=client,
-            dietitian=dietitian
-        )
-        if not created:
-            serializer.instance = chat_room
-
+        serializer.save()
+            
 class ChatRoomRetrieveView(generics.RetrieveAPIView):
     queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
@@ -39,6 +33,7 @@ class ChatRoomRetrieveView(generics.RetrieveAPIView):
 class MessageListCreateView(generics.ListCreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated, IsChatRoomParticipant]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_queryset(self):
         chat_room_id = self.kwargs['chat_room_id']
