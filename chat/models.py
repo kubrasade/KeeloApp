@@ -35,6 +35,8 @@ class Message(BaseModel):
         related_name='sent_messages'
     )
     content = models.TextField()
+    image = models.ImageField(blank=True, null= True)
+    file = models.FileField(blank=True, null= True)
 
     class Meta:
         ordering = ['created_at']
