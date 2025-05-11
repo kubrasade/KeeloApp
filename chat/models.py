@@ -1,16 +1,17 @@
 from django.db import models
 from django.conf import settings
 from core.models import BaseModel
+from users.models import ClientProfile, DietitianProfile
 
 
 class ChatRoom(BaseModel):
     client = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        ClientProfile,
         on_delete=models.CASCADE,
         related_name='client_chat_rooms'
     )
     dietitian = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        DietitianProfile,
         on_delete=models.CASCADE,
         related_name='dietitian_chat_rooms'
     )
