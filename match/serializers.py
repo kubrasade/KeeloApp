@@ -20,19 +20,20 @@ class SimpleClientProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClientProfile
-        fields = ('id', 'user')
+        fields = ('id', 'user', 'profile_picture',)
 
 class SimpleDietitianProfileSerializer(serializers.ModelSerializer):
     user = SimpleUserSerializer(read_only=True)
 
     class Meta:
         model = DietitianProfile
-        fields = ('id', 'user', 'specializations', 'experience_years')
+        fields = ('id', 'user', 'specializations', 'experience_years', 'profile_picture')
 
 class SimpleMatchingSerializer(serializers.ModelSerializer):
+    dietitian = SimpleDietitianProfileSerializer(read_only=True)
     class Meta:
         model = MatchModel
-        fields = ['id']
+        fields = ['id', 'dietitian']
 
 class DietitianScoreSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
@@ -92,12 +93,12 @@ class SpecializationChoiceSerializer(serializers.ModelSerializer):
 
 class MatchingSerializer(serializers.ModelSerializer):
     client = SimpleClientProfileSerializer(read_only=True)
-    dietitian = DietitianScoreSerializer(read_only=True)
+    dietitian = SimpleDietitianProfileSerializer(read_only=True) 
     specialization = SpecializationSerializer(read_only=True)
 
     client_id = serializers.PrimaryKeyRelatedField(queryset=ClientProfile.objects.all(), source='client', write_only=True)
     dietitian_id = serializers.PrimaryKeyRelatedField(queryset=DietitianProfile.objects.all(), source='dietitian', write_only=True)
-    specialization_id = serializers.PrimaryKeyRelatedField(queryset=Specialization.objects.all(), source='specialization', write_only=True)
+    specialization_id = serializers.PrimaryKeyRelatedField(queryset=Specialization.objects.all(), source='specialization', write_only=True, required= False)
 
     class Meta:
         model = MatchModel
@@ -131,7 +132,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         source='matching',
         write_only=True
     )
-
     class Meta:
         model = Review
         fields = ['id', 'matching', 'matching_id', 'rating', 'comment', 'created_at', 'updated_at', 'status']

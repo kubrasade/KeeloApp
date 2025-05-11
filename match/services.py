@@ -59,7 +59,7 @@ class DietitianScoringService:
         return score
 
     @staticmethod
-    def get_dietitians_by_specialization(specialization):
+    def get_dietitians_by_specialization_queryset(specialization):
         dietitians = DietitianProfile.objects.filter(specializations=specialization)
         scored_dietitians = []
         
@@ -75,12 +75,6 @@ class DietitianScoringService:
 class MatchingService:
     @staticmethod
     def create_matching(client, dietitian, specialization):
-        if not SpecializationChoice.objects.filter(
-            client=client,
-            specialization=specialization
-        ).exists():
-            raise exceptions.ValidationError("You have not chosen this specialization.")
-
         if not dietitian.specializations.filter(id=specialization.id).exists():
             raise exceptions.ValidationError("This dietitian is not in your chosen specialty.")
         

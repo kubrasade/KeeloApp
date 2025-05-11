@@ -1,7 +1,9 @@
 from rest_framework import generics, status, exceptions
+from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import MatchModel, Review, SpecializationChoice
+from .models import MatchModel, Review
+from users.models import DietitianProfile
 from .serializers import (
     MatchingSerializer,
     MatchingUpdateSerializer,
@@ -34,19 +36,42 @@ class SpecializationChoiceListCreateView(generics.ListCreateAPIView):
         serializer.instance = choice
 
 
+from rest_framework.response import Response
+
 class DietitianListBySpecializationView(generics.ListAPIView):
     permission_classes = [IsAuthenticated, IsClient]
     serializer_class = DietitianScoreSerializer
 
     def get_queryset(self):
         specialization_id = self.kwargs.get('specialization_id')
+        search = self.request.query_params.get('search', '').strip()
         try:
             specialization = Specialization.objects.get(id=specialization_id)
-            scored_dietitians = DietitianScoringService.get_dietitians_by_specialization(specialization)
-            return [item['dietitian'] for item in scored_dietitians]
-        except Specialization.DoesNotExist:
-            return []
+            dietitians = DietitianProfile.objects.filter(specializations=specialization)
 
+            if search:
+                dietitians = dietitians.filter(
+                    Q(user__first_name__icontains=search) |  
+                    Q(user__last_name__icontains=search) |   
+                    Q(city__icontains=search)                
+                )
+
+            return dietitians
+        except Specialization.DoesNotExist:
+            return DietitianProfile.objects.none()
+
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset() 
+        specialization = Specialization.objects.get(id=self.kwargs['specialization_id'])  
+        scored = DietitianScoringService.get_dietitians_by_specialization_queryset(specialization)  
+        
+        response_data = []
+        for item in scored:
+            data = self.get_serializer(item['dietitian']).data
+            data.update(item['score'])
+            response_data.append(data)
+        return Response(response_data)
 
 class MatchingListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
