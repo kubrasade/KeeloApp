@@ -207,18 +207,21 @@ class ProgressListView(generics.ListCreateAPIView):
             serializer.validated_data
         )
 
-class ProgressUpdateView(generics.UpdateAPIView):
+class ProgressUpdateDeleteView(generics.UpdateAPIView, generics.DestroyAPIView):
     queryset = Progress.objects.all()
     serializer_class = ProgressSerializer
-    permission_classes = [IsAuthenticated]  
+    permission_classes = [IsAuthenticated]
 
     def get_object(self):
         obj = super().get_object()
-
         if obj.user != self.request.user and not self.request.user.is_staff:
-            raise PermissionDenied("You do not have permission to update this progress.")
-        
+            raise PermissionDenied("You do not have permission to update or delete this progress.")
+
         return obj
+
+    def perform_destroy(self, instance):
+        instance.delete()  
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class PerformanceMetricListView(generics.ListCreateAPIView):
     serializer_class = PerformanceMetricSerializer

@@ -11,7 +11,7 @@ from .views import (
     ProgressListView,
     PerformanceMetricListView,
     ExerciseProgressView,
-    ProgressUpdateView
+    ProgressUpdateDeleteView
 )
 
 urlpatterns = [
@@ -27,7 +27,7 @@ urlpatterns = [
     path('workplan/<int:plan_id>/schedule/', WeeklyScheduleView.as_view(), name='weekly-schedule'),
 
     path('progress/', ProgressListView.as_view(), name='progress-list-create'),
-    path('progress/<int:pk>/update/', ProgressUpdateView.as_view(), name="update-progress"),
+    path('progress/<int:pk>/', ProgressUpdateDeleteView.as_view(), name="update-progress"),
 
     path('exercises/<int:exercise_id>/metrics/', PerformanceMetricListView.as_view(), name='exercise-metrics'),
     path('exercises/<int:exercise_id>/progress/', ExerciseProgressView.as_view(), name='exercise-progress'),

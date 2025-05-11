@@ -3,6 +3,7 @@ from core.models import BaseModel
 from core.enums import Difficulty_Type
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from users.models import DietitianProfile
 
 class ExerciseCategory(BaseModel):
     name = models.CharField(max_length=100, unique=True)
@@ -150,6 +151,7 @@ class WorkoutPlanDay(BaseModel):
 
 class Progress(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='progress_records_by_user')
+    dietitian = models.ForeignKey(DietitianProfile, on_delete=models.SET_NULL, null=True, blank=True)
     workout = models.ForeignKey(Workout, on_delete=models.CASCADE, related_name= 'progress_records')
     date = models.DateField()
     completed = models.BooleanField(default=False)

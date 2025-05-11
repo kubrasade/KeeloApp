@@ -63,7 +63,10 @@ class DietitianProfileListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsProfileOwnerOrAdmin]
 
     def get_queryset(self):
-        return DietitianProfileService.get_dietitian_profiles(self.request.user)
+        if self.request.user.is_staff:
+            return DietitianProfile.objects.all()
+        else:
+            return DietitianProfile.objects.filter(is_active=True)
 
     def perform_create(self, serializer):
         profile = DietitianProfileService.create_profile(
@@ -138,9 +141,12 @@ class HealthMetricListCreateView(generics.ListCreateAPIView):
         return HealthMetricService.get_metrics(self.request.user)
 
     def perform_create(self, serializer):
+        validated_data = serializer.validated_data.copy()
+        validated_data.pop('client', None)  
+        
         metric = HealthMetricService.create_metric(
-            client=self.request.user,
-            **serializer.validated_data
+            client=self.request.user, 
+            **validated_data
         )
         serializer.instance = metric
 

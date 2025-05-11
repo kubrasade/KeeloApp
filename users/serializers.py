@@ -50,7 +50,7 @@ class DietitianProfileSerializer(serializers.ModelSerializer):
             'id', 'user', 'specializations', 'specializations_ids', 
             'bio', 'education', 'experience_years', 'certificate_info',
             'consultation_fee', 'availability', 'rating', 'total_ratings',
-            'website', 'social_links', 'profile_picture', 'gender', 'birth_date', 'city'
+            'website', 'social_links', 'profile_picture', 'gender', 'birth_date', 'city', 
         ]
         read_only_fields = ['id', 'rating', 'total_ratings']
 
