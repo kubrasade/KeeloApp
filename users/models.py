@@ -119,6 +119,9 @@ class DietitianProfile(BaseModel):
     def __str__(self):
         return f"{self.user.get_full_name()} ({self.user.email})"
     
+    def get_full_name(self):
+        return self.user.get_full_name()
+
 class ClientProfile(BaseModel):
     birth_place= models.CharField(max_length=50, blank=True, null= True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
@@ -156,6 +159,9 @@ class ClientProfile(BaseModel):
     class Meta:
         verbose_name = _('Client Profile')
         verbose_name_plural = _('Client Profiles')
+
+    def get_full_name(self):
+        return self.user.get_full_name()
 
     def __str__(self):
         return f"{self.user.get_full_name()} ({self.user.email})"
