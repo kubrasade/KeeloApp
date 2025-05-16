@@ -201,8 +201,9 @@ class ProgressListView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         workout = serializer.validated_data['workout']
+        user = serializer.validated_data.get('user',self.request.user)
         ProgressService.record_workout_progress(
-            self.request.user,
+            user,
             workout,
             serializer.validated_data
         )

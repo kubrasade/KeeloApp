@@ -211,13 +211,19 @@ class ProgressSerializer(serializers.ModelSerializer):
         source='workout',
         write_only=True
     )
+    user_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source='user',
+        write_only=True,
+        required=False
+    )
 
     class Meta:
         model = Progress
         fields = [
             'id', 'workout', 'workout_id', 'date',
             'completed', 'notes', 'duration', 'rating',
-            'created_at', 'updated_at'
+            'created_at', 'updated_at', 'user_id'
         ]
         read_only_fields = ['created_at', 'updated_at', 'user']
 

@@ -132,16 +132,20 @@ class WorkoutPlanService:
             plan=plan,
             day_number__range=(start_day, end_day)
         ).order_by('day_number')
-
+    
 class ProgressService:
     @staticmethod
     def record_workout_progress(user, workout, data):
+        if not data.get('date'):
+            raise exceptions.ValidationError("Date field is required.")
+
         if Progress.objects.filter(user=user, workout=workout, date=data['date']).exists():
             raise exceptions.ValidationError("Progress for this workout and date already exists.")
-        
-        data = dict(data)  
+
+        data = dict(data)
+        data.pop('user', None)
         data.pop('workout', None)
-        
+
         return Progress.objects.create(user=user, workout=workout, **data)
 
     @staticmethod
