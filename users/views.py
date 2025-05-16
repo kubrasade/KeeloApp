@@ -63,10 +63,7 @@ class DietitianProfileListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsProfileOwnerOrAdmin]
 
     def get_queryset(self):
-        if self.request.user.is_staff:
-            return DietitianProfile.objects.all()
-        else:
-            return DietitianProfile.objects.filter(is_active=True)
+        return DietitianProfileService.get_dietitian_profiles(self.request.user)
 
     def perform_create(self, serializer):
         profile = DietitianProfileService.create_profile(

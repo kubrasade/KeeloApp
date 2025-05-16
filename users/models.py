@@ -94,6 +94,7 @@ class DietitianProfile(BaseModel):
         Specialization,
         related_name='dietitians'
     )
+    license_number= models.CharField(max_length=20, null=True, blank=True)
     bio = models.TextField(blank=True)
     education = models.TextField(blank=True)
     experience_years = models.PositiveIntegerField(default=0)
