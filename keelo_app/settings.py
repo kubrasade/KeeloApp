@@ -8,7 +8,8 @@ SECRET_KEY = 'django-insecure-vcm#i^lysc@sqzkuu36@r0@v53f%ub=fcekwvcby#qwhg3u5te
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+CORS_ALLOW_ALL_ORIGINS = True
 
 DJANGO_APPS= [
     'django.contrib.admin',
@@ -43,6 +44,7 @@ LOCAL_APPS =[
     'traning',
     'chat',
     'appointment',
+    'contact',
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS 
 
