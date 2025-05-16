@@ -37,24 +37,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message = data["message"]
             message_obj = await self.save_message(user, message)
 
+            message_data = await self.get_message_data(message_obj)
+
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     "type": "chat_message",
-                    "message": message,
-                    "sender_id": user.id,
-                    "message_id": message_obj.id,
-                    "timestamp": message_obj.created_at.isoformat()
+                    "message_data": message_data
                 }
             )
 
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({
             "type": "chat_message",
-            "message": event["message"],
-            "sender_id": event["sender_id"],
-            "message_id": event["message_id"],
-            "timestamp": event["timestamp"]
+            "message_data": event["message_data"]
         }))
 
     @database_sync_to_async
@@ -65,6 +61,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def save_message(self, sender, content):
         room = ChatRoom.objects.get(id=self.room_id)
         return Message.objects.create(chat_room=room, sender=sender, content=content)
+
+    @database_sync_to_async
+    def get_message_data(self, message):
+        return {
+            "id": message.id,
+            "sender": {
+                "id": message.sender.id,
+                "first_name": message.sender.first_name,
+                "last_name": message.sender.last_name
+            },
+            "content": message.content,
+            "created_at": message.created_at.isoformat(),
+            "image": message.image.url if message.image else None,
+            "file": message.file.url if message.file else None
+        }
 
     @database_sync_to_async
     def mark_message_as_read(self, message, user):

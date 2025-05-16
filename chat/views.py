@@ -11,12 +11,31 @@ from .serializers import (
 from .permissions import IsClientOrDietitian
 from .permissions import IsChatRoomParticipant, IsMessageSender
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from users.models import ClientProfile, DietitianProfile
 
 class ChatRoomListCreateView(generics.ListCreateAPIView):
     queryset = ChatRoom.objects.all()
     permission_classes = [IsAuthenticated]
-    
+
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if ClientProfile.objects.filter(user=user).exists():
+            return ChatRoom.objects.filter(client__user=user)
+
+        if DietitianProfile.objects.filter(user=user).exists():
+            return ChatRoom.objects.filter(dietitian__user=user)
+
+        if user.is_staff:
+            return ChatRoom.objects.all()
+
+        return ChatRoom.objects.none()
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return ChatRoomCreateSerializer
+        return ChatRoomSerializer
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return ChatRoomCreateSerializer

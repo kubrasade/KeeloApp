@@ -188,3 +188,6 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API documentation for Dietitian Systems',
     'VERSION': '1.0.0',
 }
+
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
