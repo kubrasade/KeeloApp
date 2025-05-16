@@ -87,7 +87,8 @@ class RecipeService:
 
 class MealPlanService:
     @staticmethod
-    def create_meal_plan(user, data):
+    def create_meal_plan(request_user, data):
+        user = data.pop('user', None) or request_user
         if MealPlan.objects.filter(
             user=user,
             day=data['day'],
@@ -95,7 +96,6 @@ class MealPlanService:
             date=data['date']
         ).exists():
             raise exceptions.ValidationError("There is already a plan for this meal.")
-        
         return MealPlan.objects.create(user=user, **data)
 
     @staticmethod

@@ -11,6 +11,7 @@ from .models import (
     MacroGoal,
 )
 from django.db.models import Avg
+from users.models import User
 
 class MealCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -126,12 +127,17 @@ class MealPlanSerializer(serializers.ModelSerializer):
         source='recipe',
         write_only=True
     )
-
+    user_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source='user',
+        write_only=True,
+        required=False
+    )
     class Meta:
         model = MealPlan
         fields = [
             'id', 'day', 'meal_type', 'recipe', 'recipe_id',
-            'date', 'notes', 'created_at', 'updated_at', 'user'
+            'date', 'notes', 'created_at', 'updated_at', 'user', 'user_id'
         ]
         read_only_fields = ['created_at', 'updated_at', 'user']
 
