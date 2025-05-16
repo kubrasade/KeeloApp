@@ -38,15 +38,23 @@ class MatchModel(BaseModel):
 
 
 class Review(BaseModel):
-    matching = models.OneToOneField(MatchModel, on_delete=models.CASCADE, related_name='review')
+    matching = models.ForeignKey(MatchModel, on_delete=models.CASCADE, related_name='review')
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)]
     )
     comment = models.TextField(blank= True, null= True)
     status = models.PositiveSmallIntegerField(choices= ReviewStatus.choices, default= ReviewStatus.PENDING)
-
+    is_deleted = models.BooleanField(default=False)
+    
     class Meta:
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['matching'],
+                condition=models.Q(is_deleted=False),
+                name='unique_active_review_per_matching'
+            )
+        ]
 
     def __str__(self):
         return f"Review for {self.matching.dietitian.user.get_full_name()} by {self.matching.client.user.get_full_name()}" 

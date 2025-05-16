@@ -21,6 +21,8 @@ from .services import (
 from core.permissions import IsClient, IsAdmin
 from users.models import Specialization, ClientProfile
 from core.enums import UserType, ReviewStatus
+from rest_framework.exceptions import PermissionDenied
+
 
 class SpecializationChoiceListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsClient]
@@ -144,7 +146,7 @@ class ReviewListCreateView(generics.ListCreateAPIView):
         if user_type == UserType.CLIENT:
             return ReviewService.get_client_reviews(self.request.user.client_profile).filter(status=ReviewStatus.ACCEPTED)
         elif user_type == UserType.DIETITIAN:
-            return ReviewService.get_dietitian_reviews(self.request.user.dietitian_profile).filter(status=ReviewStatus.ACCEPTED)
+            return ReviewService.get_dietitian_reviews(self.request.user.dietitian_profile)
         elif user_type == UserType.ADMIN:
             return Review.objects.all()
         return Review.objects.none()
@@ -183,4 +185,22 @@ class ReviewRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 class ReviewStatusView(generics.UpdateAPIView):
     queryset = Review.objects.all()
     serializer_class= ReviewStatusUpdateSerializer
-    permission_classes=[IsAdmin]
+    permission_classes=[IsAuthenticated]
+
+
+    def get_object(self):
+        obj = super().get_object()
+        user = self.request.user
+
+        try:
+            dietitian_user_id = obj.matching.dietitian.user_id
+        except AttributeError:
+            dietitian_user_id = None
+
+        is_admin = user.is_staff
+        is_dietitian = dietitian_user_id == user.id
+
+        if not (is_admin or is_dietitian):
+            raise PermissionDenied("You do not have permission to update this review.")
+
+        return obj

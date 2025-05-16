@@ -133,7 +133,15 @@ class ReviewService:
         if matching.status != MatchingStatus.ACCEPTED:
             raise exceptions.ValidationError("You can only comment on active matches.")
         
-        if Review.objects.filter(matching=matching).exists():
+        deleted_review = Review.objects.filter(matching=matching, is_deleted=True).first()
+        if deleted_review:
+            deleted_review.is_deleted = False
+            deleted_review.rating = rating
+            deleted_review.comment = comment
+            deleted_review.save()
+            return deleted_review
+
+        if Review.objects.filter(matching=matching, is_deleted=False).exists():
             raise exceptions.ValidationError("You have already commented on this dietitian.")
         
         return Review.objects.create(

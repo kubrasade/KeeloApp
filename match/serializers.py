@@ -144,7 +144,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         if matching.client.user != user:
             raise serializers.ValidationError("You can only review your own dietitian.")
 
-        if Review.objects.filter(matching=matching).exists():
+        if Review.objects.filter(matching=matching, is_deleted=False).exists():
             raise serializers.ValidationError("You have already submitted a review for this match.")
         return data
 
@@ -155,6 +155,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             comment=validated_data.get('comment', ''),
             user=self.context['request'].user
         )
+    
 class ReviewStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
