@@ -78,7 +78,7 @@ class WorkoutListView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff or user.user_type == UserType.ADMIN:
+        if user.is_staff or user.user_type == UserType.DIETITIAN:
             return Workout.objects.all()
         return Workout.objects.filter(approved_by__isnull=False)
 
@@ -133,18 +133,7 @@ class WorkoutPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-
-        if user.is_staff or user.user_type == UserType.ADMIN:
-            return WorkoutPlan.objects.all()
-
-        if user.user_type == UserType.DIETITIAN:
-            return WorkoutPlan.objects.filter(created_by=user)
-
-        if user.user_type == UserType.CLIENT:
-            return WorkoutPlan.objects.filter(client=user)
-
-        return WorkoutPlan.objects.none()
+        return WorkoutPlan.objects.all()
 
     def perform_update(self, serializer):
         user = self.request.user
