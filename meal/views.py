@@ -9,7 +9,8 @@ from .models import (
     Recipe,
     RecipeIngredient,
     MealPlan,
-    RecipeRating
+    RecipeRating,
+    DietaryTag
 )
 from .serializers import (
     MealCategorySerializer,
@@ -18,7 +19,8 @@ from .serializers import (
     MealPlanSerializer,
     RecipeRatingSerializer,
     FavoriteRecipeSerializer,
-    MacroGoalSerializer
+    MacroGoalSerializer,
+    DietaryTagSerializer
 )
 from .services import (
     RecipeService,
@@ -191,3 +193,9 @@ class MacroGoalRetrieveUpdateView(generics.RetrieveUpdateAPIView):
             macro_goal = MacroGoalService.update_macro_goal(self.request.user, {})
 
         return macro_goal
+    
+
+class DietaryTagListView(generics.ListAPIView):
+    serializer_class= DietaryTagSerializer
+    queryset = DietaryTag.objects.all()
+    permission_classes= [IsAuthenticated]

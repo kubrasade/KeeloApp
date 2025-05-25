@@ -13,10 +13,12 @@ from .views import (
     FavoriteRecipeListView,
     AddFavoriteRecipeView,
     RemoveFavoriteRecipeView,
-    MacroGoalRetrieveUpdateView
+    MacroGoalRetrieveUpdateView,
+    DietaryTagListView
 )
 
 urlpatterns = [
+    path('dietary-tags/', DietaryTagListView.as_view(), name='dietary-tag-list'),
     path('categories/', MealCategoryListView.as_view(), name='meal-category-list'),
     path('ingredients/', IngredientListView.as_view(), name='ingredient-list'),
     path('recipes/', RecipeListCreateView.as_view(), name='recipe-list'),

@@ -13,6 +13,11 @@ from .models import (
 from django.db.models import Avg
 from users.models import User
 
+class DietaryTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DietaryTag
+        fields = ['id', 'name']
+
 class MealCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = MealCategory

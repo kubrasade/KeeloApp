@@ -5,6 +5,7 @@ class Meal_Type(models.IntegerChoices):
     LUNCH= 2, "Lunch"
     DINNER= 3, "Dinner"
     SNACK= 4, "Snack"
+    DESSERT= 5, "Dessert"
 
 class Unit_Type(models.IntegerChoices):
     G= 1, "Gram"
