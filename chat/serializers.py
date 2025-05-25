@@ -37,16 +37,10 @@ class MessageReadSerializer(serializers.ModelSerializer):
 
 class MessageSerializer(serializers.ModelSerializer):
     sender = UserSerializer(read_only=True)
-
     class Meta:
         model = Message
         fields = ['id', 'chat_room', 'sender', 'content', 'created_at', 'file', 'image']
         read_only_fields = ['id', 'created_at']
-
-    def create(self, validated_data):
-        validated_data['sender'] = self.context['request'].user
-        return super().create(validated_data)
-
 
 class ChatRoomSerializer(serializers.ModelSerializer):
     client = SimpleClientProfileSerializer(read_only=True)

@@ -35,7 +35,7 @@ class Message(BaseModel):
         on_delete=models.CASCADE,
         related_name='sent_messages'
     )
-    content = models.TextField()
+    content = models.TextField(blank=True, null= True)
     image = models.ImageField(blank=True, null= True)
     file = models.FileField(blank=True, null= True)
 

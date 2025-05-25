@@ -12,6 +12,8 @@ from .permissions import IsClientOrDietitian
 from .permissions import IsChatRoomParticipant, IsMessageSender
 from rest_framework.parsers import MultiPartParser, FormParser
 from users.models import ClientProfile, DietitianProfile
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 class ChatRoomListCreateView(generics.ListCreateAPIView):
     queryset = ChatRoom.objects.all()
@@ -60,7 +62,16 @@ class MessageListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         chat_room = ChatRoom.objects.get(id=self.kwargs['chat_room_id'])
-        serializer.save(chat_room=chat_room, sender=self.request.user)
+        message = serializer.save(chat_room=chat_room, sender=self.request.user)
+        message.refresh_from_db()
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"chat_{chat_room.id}",
+            {
+                "type": "chat_message",
+                "message_data": MessageSerializer(message, context={'request': self.request}).data
+            }
+        )
 
 class MessageRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Message.objects.all()
