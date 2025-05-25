@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from .models import DietitianProfile, ClientProfile, Specialization, HealthMetric
 from .enums import HealthMetricType
+from core.enums import UserType
 
 User = get_user_model()
 
@@ -113,6 +114,6 @@ class HealthMetricService:
 
     @staticmethod
     def get_metrics(user=None):
-        if user and user.is_staff:
+        if user and user.is_staff or user.user_type == UserType.DIETITIAN:
             return HealthMetric.objects.all()
         return HealthMetric.objects.filter(client=user) 

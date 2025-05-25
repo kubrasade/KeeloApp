@@ -8,7 +8,7 @@ class FitnessLevel(models.IntegerChoices):
 class HealthMetricType(models.IntegerChoices):
     WEIGHT = 1, ('Weight')
     BODY_FAT = 2, ('Body Fat')
-    MUSCLE_MASS = 3, ('Muscle Mass')
+    HEIGHT = 3, ('Height')
     BMI = 4, ('Body Mass Index')
     WAIST = 5, ('Waist Circumference')
     HIP = 6, ('Hip Circumference')

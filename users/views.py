@@ -135,7 +135,11 @@ class HealthMetricListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return HealthMetricService.get_metrics(self.request.user)
+        queryset = HealthMetricService.get_metrics(self.request.user)
+        client_id = self.request.query_params.get('client')
+        if client_id:
+            queryset = queryset.filter(client_id=client_id)
+        return queryset
 
     def perform_create(self, serializer):
         validated_data = serializer.validated_data.copy()
