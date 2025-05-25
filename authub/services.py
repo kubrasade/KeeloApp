@@ -15,10 +15,10 @@ User = get_user_model()
 
 class AuthService:
     @staticmethod
-    def register_user(email, password, first_name, last_name, user_type):
+    def register_user(email, password, first_name, last_name, user_type, license_number=None):
         if User.objects.filter(email=email).exists():
             raise exceptions.ValidationError("This email address is already in use.")
-        
+
         user = User.objects.create_user(
             email=email,
             password=password,
@@ -31,7 +31,8 @@ class AuthService:
         if user.user_type == UserType.CLIENT.value:
             ClientProfile.objects.create(user=user)
         elif user.user_type == UserType.DIETITIAN.value:
-            DietitianProfile.objects.create(user=user)
+            DietitianProfile.objects.create(user=user, license_number=license_number)
+    
         
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))

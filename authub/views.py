@@ -25,7 +25,8 @@ class UserRegistrationView(generics.CreateAPIView):
             password=serializer.validated_data['password'],
             first_name=serializer.validated_data['first_name'],
             last_name=serializer.validated_data['last_name'],
-            user_type=serializer.validated_data['user_type']
+            user_type=serializer.validated_data['user_type'],
+            license_number=serializer.validated_data.get('license_number')
         )
         
         return Response(
